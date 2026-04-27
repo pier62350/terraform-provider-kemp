@@ -18,6 +18,16 @@ type VirtualService struct {
 	Enable          *bool  `json:"Enable,omitempty"`
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
+
+	// ESP (Edge Security Pack)
+	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
+	AllowedHosts        string `json:"AllowedHosts,omitempty"`
+	AllowedDirectories  string `json:"AllowedDirectories,omitempty"`
+	InputAuthMode       string `json:"InputAuthMode,omitempty"`
+	OutputAuthMode      string `json:"OutputAuthMode,omitempty"`
+	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`
+	DisplayPubPriv      *bool  `json:"DisplayPubPriv,omitempty"`
+	EspLogs             *bool  `json:"EspLogs,omitempty"`
 }
 
 // VirtualServiceParams are the optional knobs for create/modify.
@@ -28,6 +38,16 @@ type VirtualServiceParams struct {
 	Enable          *bool  `json:"Enable,omitempty"`
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
+
+	// ESP (Edge Security Pack)
+	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
+	AllowedHosts        string `json:"AllowedHosts,omitempty"`
+	AllowedDirectories  string `json:"AllowedDirectories,omitempty"`
+	InputAuthMode       string `json:"InputAuthMode,omitempty"`
+	OutputAuthMode      string `json:"OutputAuthMode,omitempty"`
+	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`
+	DisplayPubPriv      *bool  `json:"DisplayPubPriv,omitempty"`
+	EspLogs             *bool  `json:"EspLogs,omitempty"`
 }
 
 type vsResponse struct {

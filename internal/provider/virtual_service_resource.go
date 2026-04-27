@@ -43,6 +43,16 @@ type VirtualServiceResourceModel struct {
 	Enabled         types.Bool   `tfsdk:"enabled"`
 	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
 	CertFiles       types.List   `tfsdk:"cert_files"`
+
+	// ESP
+	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
+	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
+	EspAllowedDirectories  types.String `tfsdk:"esp_allowed_directories"`
+	EspInputAuthMode       types.String `tfsdk:"esp_input_auth_mode"`
+	EspOutputAuthMode      types.String `tfsdk:"esp_output_auth_mode"`
+	EspIncludeNestedGroups types.Bool   `tfsdk:"esp_include_nested_groups"`
+	EspDisplayPubPriv      types.Bool   `tfsdk:"esp_display_pub_priv"`
+	EspLogs                types.Bool   `tfsdk:"esp_logs"`
 }
 
 func (r *VirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -99,6 +109,46 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+			"esp_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Enable Kemp Edge Security Pack (ESP) on this VS — pre-auth, SSO, header injection, etc. Requires `type = http` and typically `ssl_acceleration = true`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_allowed_hosts": schema.StringAttribute{
+				MarkdownDescription: "Newline-separated list of hostnames the VS will accept for ESP. Empty matches all.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_allowed_directories": schema.StringAttribute{
+				MarkdownDescription: "Newline-separated list of allowed URI prefixes when ESP is on.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_input_auth_mode": schema.StringAttribute{
+				MarkdownDescription: "Client-side authentication mode (e.g. `0` none, `1` basic auth, `2` form-based). Refer to LoadMaster docs for the full enum.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_output_auth_mode": schema.StringAttribute{
+				MarkdownDescription: "Server-side authentication mode for the upstream (e.g. `0` none, `1` basic, `2` form, `4` KCD).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_include_nested_groups": schema.BoolAttribute{
+				MarkdownDescription: "When ESP authorizes against AD groups, follow nested-group memberships.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_display_pub_priv": schema.BoolAttribute{
+				MarkdownDescription: "Display the public/private toggle on the ESP login form.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_logs": schema.BoolAttribute{
+				MarkdownDescription: "Enable extended ESP logging for this VS.",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -137,6 +187,31 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 			p.CertFile = strings.Join(certs, ",")
 		}
 	}
+
+	if !m.EspEnabled.IsNull() && !m.EspEnabled.IsUnknown() {
+		p.EspEnabled = boolPtr(m.EspEnabled.ValueBool())
+	}
+	if !m.EspAllowedHosts.IsNull() && !m.EspAllowedHosts.IsUnknown() {
+		p.AllowedHosts = m.EspAllowedHosts.ValueString()
+	}
+	if !m.EspAllowedDirectories.IsNull() && !m.EspAllowedDirectories.IsUnknown() {
+		p.AllowedDirectories = m.EspAllowedDirectories.ValueString()
+	}
+	if !m.EspInputAuthMode.IsNull() && !m.EspInputAuthMode.IsUnknown() {
+		p.InputAuthMode = m.EspInputAuthMode.ValueString()
+	}
+	if !m.EspOutputAuthMode.IsNull() && !m.EspOutputAuthMode.IsUnknown() {
+		p.OutputAuthMode = m.EspOutputAuthMode.ValueString()
+	}
+	if !m.EspIncludeNestedGroups.IsNull() && !m.EspIncludeNestedGroups.IsUnknown() {
+		p.IncludeNestedGroups = boolPtr(m.EspIncludeNestedGroups.ValueBool())
+	}
+	if !m.EspDisplayPubPriv.IsNull() && !m.EspDisplayPubPriv.IsUnknown() {
+		p.DisplayPubPriv = boolPtr(m.EspDisplayPubPriv.ValueBool())
+	}
+	if !m.EspLogs.IsNull() && !m.EspLogs.IsUnknown() {
+		p.EspLogs = boolPtr(m.EspLogs.ValueBool())
+	}
 	return p, diags
 }
 
@@ -167,6 +242,16 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	}
 	listVal, diags := types.ListValueFrom(ctx, types.StringType, certs)
 	m.CertFiles = listVal
+
+	m.EspEnabled = boolFromPtr(vs.EspEnabled)
+	m.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
+	m.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
+	m.EspInputAuthMode = types.StringValue(vs.InputAuthMode)
+	m.EspOutputAuthMode = types.StringValue(vs.OutputAuthMode)
+	m.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
+	m.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
+	m.EspLogs = boolFromPtr(vs.EspLogs)
+
 	return diags
 }
 

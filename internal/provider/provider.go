@@ -142,3 +142,12 @@ func envOr(v types.String, key string) string {
 }
 
 func boolPtr(b bool) *bool { return &b }
+
+// boolFromPtr converts a *bool from the API into a types.Bool, mapping nil
+// to false (the conventional default for ESP / SSL-related toggles).
+func boolFromPtr(b *bool) types.Bool {
+	if b == nil {
+		return types.BoolValue(false)
+	}
+	return types.BoolValue(*b)
+}

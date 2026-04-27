@@ -35,15 +35,23 @@ func (d *VirtualServiceDataSource) Schema(_ context.Context, _ datasource.Schema
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Reads a Kemp LoadMaster virtual service by its `Index`.",
 		Attributes: map[string]schema.Attribute{
-			"id":               schema.StringAttribute{Required: true, MarkdownDescription: "LoadMaster `Index` of the virtual service."},
-			"address":          schema.StringAttribute{Computed: true},
-			"port":             schema.StringAttribute{Computed: true},
-			"protocol":         schema.StringAttribute{Computed: true},
-			"type":             schema.StringAttribute{Computed: true},
-			"nickname":         schema.StringAttribute{Computed: true},
-			"enabled":          schema.BoolAttribute{Computed: true},
-			"ssl_acceleration": schema.BoolAttribute{Computed: true},
-			"cert_files":       schema.ListAttribute{Computed: true, ElementType: types.StringType},
+			"id":                        schema.StringAttribute{Required: true, MarkdownDescription: "LoadMaster `Index` of the virtual service."},
+			"address":                   schema.StringAttribute{Computed: true},
+			"port":                      schema.StringAttribute{Computed: true},
+			"protocol":                  schema.StringAttribute{Computed: true},
+			"type":                      schema.StringAttribute{Computed: true},
+			"nickname":                  schema.StringAttribute{Computed: true},
+			"enabled":                   schema.BoolAttribute{Computed: true},
+			"ssl_acceleration":          schema.BoolAttribute{Computed: true},
+			"cert_files":                schema.ListAttribute{Computed: true, ElementType: types.StringType},
+			"esp_enabled":               schema.BoolAttribute{Computed: true},
+			"esp_allowed_hosts":         schema.StringAttribute{Computed: true},
+			"esp_allowed_directories":   schema.StringAttribute{Computed: true},
+			"esp_input_auth_mode":       schema.StringAttribute{Computed: true},
+			"esp_output_auth_mode":      schema.StringAttribute{Computed: true},
+			"esp_include_nested_groups": schema.BoolAttribute{Computed: true},
+			"esp_display_pub_priv":      schema.BoolAttribute{Computed: true},
+			"esp_logs":                  schema.BoolAttribute{Computed: true},
 		},
 	}
 }
@@ -102,5 +110,15 @@ func (d *VirtualServiceDataSource) Read(ctx context.Context, req datasource.Read
 	listVal, listDiags := types.ListValueFrom(ctx, types.StringType, certs)
 	resp.Diagnostics.Append(listDiags...)
 	data.CertFiles = listVal
+
+	data.EspEnabled = boolFromPtr(vs.EspEnabled)
+	data.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
+	data.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
+	data.EspInputAuthMode = types.StringValue(vs.InputAuthMode)
+	data.EspOutputAuthMode = types.StringValue(vs.OutputAuthMode)
+	data.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
+	data.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
+	data.EspLogs = boolFromPtr(vs.EspLogs)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
