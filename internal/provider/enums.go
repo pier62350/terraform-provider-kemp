@@ -122,3 +122,25 @@ func espOutputAuthModeFromAPI(s string) string {
 		return s
 	}
 }
+
+// checkUseGetToAPI converts a friendly check_use_get value to the *int32 the
+// API expects. Unknown values default to HEAD (0).
+func checkUseGetToAPI(s string) *int32 {
+	var v int32
+	switch s {
+	case "get":
+		v = 1
+	default: // "head" or empty
+		v = 0
+	}
+	return &v
+}
+
+// checkUseGetFromAPI converts the *int32 CheckUseGet from the API to its
+// friendly name.
+func checkUseGetFromAPI(v *int32) string {
+	if v != nil && *v == 1 {
+		return "get"
+	}
+	return "head"
+}

@@ -24,15 +24,22 @@ type VirtualService struct {
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
-	CheckType           string `json:"CheckType,omitempty"`
-	CheckPort           string `json:"CheckPort,omitempty"`
-	ChkInterval         *int32 `json:"ChkInterval,omitempty"`
-	ChkTimeout          *int32 `json:"ChkTimeout,omitempty"`
-	ChkRetryCount       *int32 `json:"ChkRetryCount,omitempty"`
 	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
 	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
 	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`
 	MaxConnsLimit       *int32 `json:"MaxConnsLimit,omitempty"`
+
+	// Health checks
+	CheckType            string `json:"CheckType,omitempty"`
+	CheckPort            string `json:"CheckPort,omitempty"`
+	ChkInterval          *int32 `json:"ChkInterval,omitempty"`
+	ChkTimeout           *int32 `json:"ChkTimeout,omitempty"`
+	ChkRetryCount        *int32 `json:"ChkRetryCount,omitempty"`
+	NeedHostName         *bool  `json:"NeedHostName,omitempty"`
+	CheckUseHTTP11       *bool  `json:"CheckUse1.1,omitempty"`
+	CheckUseGet          *int32 `json:"CheckUseGet,omitempty"`
+	MatchLen             *int32 `json:"MatchLen,omitempty"`
+	EnhancedHealthChecks *bool  `json:"EnhancedHealthChecks,omitempty"`
 
 	// ESP (Edge Security Pack)
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
@@ -64,15 +71,22 @@ type VirtualServiceParams struct {
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
-	CheckType           string `json:"CheckType,omitempty"`
-	CheckPort           string `json:"CheckPort,omitempty"`
-	ChkInterval         *int32 `json:"ChkInterval,omitempty"`
-	ChkTimeout          *int32 `json:"ChkTimeout,omitempty"`
-	ChkRetryCount       *int32 `json:"ChkRetryCount,omitempty"`
 	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
 	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
 	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`
 	MaxConnsLimit       *int32 `json:"MaxConnsLimit,omitempty"`
+
+	// Health checks
+	CheckType            string `json:"CheckType,omitempty"`
+	CheckPort            string `json:"CheckPort,omitempty"`
+	ChkInterval          *int32 `json:"ChkInterval,omitempty"`
+	ChkTimeout           *int32 `json:"ChkTimeout,omitempty"`
+	ChkRetryCount        *int32 `json:"ChkRetryCount,omitempty"`
+	NeedHostName         *bool  `json:"NeedHostName,omitempty"`
+	CheckUseHTTP11       *bool  `json:"CheckUse1.1,omitempty"`
+	CheckUseGet          *int32 `json:"CheckUseGet,omitempty"`
+	MatchLen             *int32 `json:"MatchLen,omitempty"`
+	EnhancedHealthChecks *bool  `json:"EnhancedHealthChecks,omitempty"`
 
 	// ESP (Edge Security Pack)
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`

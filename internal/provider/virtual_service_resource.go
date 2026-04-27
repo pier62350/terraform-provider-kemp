@@ -49,15 +49,22 @@ type VirtualServiceResourceModel struct {
 	PersistTimeout      types.String `tfsdk:"persist_timeout"`
 	Idletime            types.Int64  `tfsdk:"idletime"`
 	ForceL7             types.Bool   `tfsdk:"force_l7"`
-	CheckType           types.String `tfsdk:"check_type"`
-	CheckPort           types.String `tfsdk:"check_port"`
-	ChkInterval         types.Int64  `tfsdk:"chk_interval"`
-	ChkTimeout          types.Int64  `tfsdk:"chk_timeout"`
-	ChkRetryCount       types.Int64  `tfsdk:"chk_retry_count"`
 	Bandwidth           types.Int64  `tfsdk:"bandwidth"`
 	ConnsPerSecLimit    types.Int64  `tfsdk:"conns_per_sec_limit"`
 	RequestsPerSecLimit types.Int64  `tfsdk:"requests_per_sec_limit"`
 	MaxConnsLimit       types.Int64  `tfsdk:"max_conns_limit"`
+
+	// Health checks
+	CheckType            types.String `tfsdk:"check_type"`
+	CheckPort            types.String `tfsdk:"check_port"`
+	ChkInterval          types.Int64  `tfsdk:"chk_interval"`
+	ChkTimeout           types.Int64  `tfsdk:"chk_timeout"`
+	ChkRetryCount        types.Int64  `tfsdk:"chk_retry_count"`
+	NeedHostName         types.Bool   `tfsdk:"need_host_name"`
+	CheckUseHTTP11       types.Bool   `tfsdk:"check_use_http11"`
+	CheckUseGet          types.String `tfsdk:"check_use_get"`
+	MatchLen             types.Int64  `tfsdk:"match_len"`
+	EnhancedHealthChecks types.Bool   `tfsdk:"enhanced_health_checks"`
 
 	// ESP
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
@@ -171,6 +178,31 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 			},
 			"chk_retry_count": schema.Int64Attribute{
 				MarkdownDescription: "Number of consecutive failed health checks before a real server is marked down.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"need_host_name": schema.BoolAttribute{
+				MarkdownDescription: "Send the VS hostname in the HTTP `Host` header during health checks.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"check_use_http11": schema.BoolAttribute{
+				MarkdownDescription: "Use HTTP/1.1 for HTTP-based health checks (instead of HTTP/1.0).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"check_use_get": schema.StringAttribute{
+				MarkdownDescription: "HTTP method used for health checks: `head` (default) or `get`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"match_len": schema.Int64Attribute{
+				MarkdownDescription: "Number of bytes of the health check response body to inspect for the match pattern.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"enhanced_health_checks": schema.BoolAttribute{
+				MarkdownDescription: "Enable enhanced health checks (sends a more complete HTTP request).",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -319,6 +351,22 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 		v := int32(m.ChkRetryCount.ValueInt64())
 		p.ChkRetryCount = &v
 	}
+	if !m.NeedHostName.IsNull() && !m.NeedHostName.IsUnknown() {
+		p.NeedHostName = boolPtr(m.NeedHostName.ValueBool())
+	}
+	if !m.CheckUseHTTP11.IsNull() && !m.CheckUseHTTP11.IsUnknown() {
+		p.CheckUseHTTP11 = boolPtr(m.CheckUseHTTP11.ValueBool())
+	}
+	if !m.CheckUseGet.IsNull() && !m.CheckUseGet.IsUnknown() {
+		p.CheckUseGet = checkUseGetToAPI(m.CheckUseGet.ValueString())
+	}
+	if !m.MatchLen.IsNull() && !m.MatchLen.IsUnknown() {
+		v := int32(m.MatchLen.ValueInt64())
+		p.MatchLen = &v
+	}
+	if !m.EnhancedHealthChecks.IsNull() && !m.EnhancedHealthChecks.IsUnknown() {
+		p.EnhancedHealthChecks = boolPtr(m.EnhancedHealthChecks.ValueBool())
+	}
 	if !m.Bandwidth.IsNull() && !m.Bandwidth.IsUnknown() {
 		v := int32(m.Bandwidth.ValueInt64())
 		p.Bandwidth = &v
@@ -412,6 +460,11 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.ChkInterval = int64FromPtr(vs.ChkInterval)
 	m.ChkTimeout = int64FromPtr(vs.ChkTimeout)
 	m.ChkRetryCount = int64FromPtr(vs.ChkRetryCount)
+	m.NeedHostName = boolFromPtr(vs.NeedHostName)
+	m.CheckUseHTTP11 = boolFromPtr(vs.CheckUseHTTP11)
+	m.CheckUseGet = types.StringValue(checkUseGetFromAPI(vs.CheckUseGet))
+	m.MatchLen = int64FromPtr(vs.MatchLen)
+	m.EnhancedHealthChecks = boolFromPtr(vs.EnhancedHealthChecks)
 	m.Bandwidth = int64FromPtr(vs.Bandwidth)
 	m.ConnsPerSecLimit = int64FromPtr(vs.ConnsPerSecLimit)
 	m.RequestsPerSecLimit = int64FromPtr(vs.RequestsPerSecLimit)

@@ -36,6 +36,26 @@ type SubVirtualServiceDataSourceModel struct {
 	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
 	CertFiles       types.List   `tfsdk:"cert_files"`
 
+	Schedule            types.String `tfsdk:"schedule"`
+	PersistTimeout      types.String `tfsdk:"persist_timeout"`
+	Idletime            types.Int64  `tfsdk:"idletime"`
+	ForceL7             types.Bool   `tfsdk:"force_l7"`
+	Bandwidth           types.Int64  `tfsdk:"bandwidth"`
+	ConnsPerSecLimit    types.Int64  `tfsdk:"conns_per_sec_limit"`
+	RequestsPerSecLimit types.Int64  `tfsdk:"requests_per_sec_limit"`
+	MaxConnsLimit       types.Int64  `tfsdk:"max_conns_limit"`
+
+	CheckType            types.String `tfsdk:"check_type"`
+	CheckPort            types.String `tfsdk:"check_port"`
+	ChkInterval          types.Int64  `tfsdk:"chk_interval"`
+	ChkTimeout           types.Int64  `tfsdk:"chk_timeout"`
+	ChkRetryCount        types.Int64  `tfsdk:"chk_retry_count"`
+	NeedHostName         types.Bool   `tfsdk:"need_host_name"`
+	CheckUseHTTP11       types.Bool   `tfsdk:"check_use_http11"`
+	CheckUseGet          types.String `tfsdk:"check_use_get"`
+	MatchLen             types.Int64  `tfsdk:"match_len"`
+	EnhancedHealthChecks types.Bool   `tfsdk:"enhanced_health_checks"`
+
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
 	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
 	EspAllowedDirectories  types.String `tfsdk:"esp_allowed_directories"`
@@ -60,12 +80,29 @@ func (d *SubVirtualServiceDataSource) Schema(_ context.Context, _ datasource.Sch
 		Attributes: map[string]schema.Attribute{
 			"id":               schema.StringAttribute{Required: true, MarkdownDescription: "LoadMaster `Index` of the SubVS."},
 			"parent_id":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "`Index` of the parent virtual service."},
-			"nickname":         schema.StringAttribute{Computed: true, MarkdownDescription: "Friendly name shown in the WUI."},
+			"nickname":         schema.StringAttribute{Computed: true},
 			"enabled":          schema.BoolAttribute{Computed: true},
-			"type":             schema.StringAttribute{Computed: true, MarkdownDescription: "VS type (`gen`, `http`, etc.)."},
+			"type":             schema.StringAttribute{Computed: true},
 			"ssl_acceleration": schema.BoolAttribute{Computed: true},
-			"cert_files":       schema.ListAttribute{Computed: true, ElementType: types.StringType, MarkdownDescription: "Certificates attached to this SubVS."},
-
+			"cert_files":       schema.ListAttribute{Computed: true, ElementType: types.StringType},
+			"schedule":                schema.StringAttribute{Computed: true},
+			"persist_timeout":         schema.StringAttribute{Computed: true},
+			"idletime":                schema.Int64Attribute{Computed: true},
+			"force_l7":                schema.BoolAttribute{Computed: true},
+			"bandwidth":               schema.Int64Attribute{Computed: true},
+			"conns_per_sec_limit":     schema.Int64Attribute{Computed: true},
+			"requests_per_sec_limit":  schema.Int64Attribute{Computed: true},
+			"max_conns_limit":         schema.Int64Attribute{Computed: true},
+			"check_type":              schema.StringAttribute{Computed: true},
+			"check_port":              schema.StringAttribute{Computed: true},
+			"chk_interval":            schema.Int64Attribute{Computed: true},
+			"chk_timeout":             schema.Int64Attribute{Computed: true},
+			"chk_retry_count":         schema.Int64Attribute{Computed: true},
+			"need_host_name":          schema.BoolAttribute{Computed: true},
+			"check_use_http11":        schema.BoolAttribute{Computed: true},
+			"check_use_get":           schema.StringAttribute{Computed: true},
+			"match_len":               schema.Int64Attribute{Computed: true},
+			"enhanced_health_checks":  schema.BoolAttribute{Computed: true},
 			"esp_enabled":               schema.BoolAttribute{Computed: true},
 			"esp_allowed_hosts":         schema.StringAttribute{Computed: true},
 			"esp_allowed_directories":   schema.StringAttribute{Computed: true},
@@ -127,15 +164,35 @@ func (d *SubVirtualServiceDataSource) Read(ctx context.Context, req datasource.R
 	resp.Diagnostics.Append(listDiags...)
 	data.CertFiles = listVal
 
+	data.Schedule = types.StringValue(vs.Schedule)
+	data.PersistTimeout = types.StringValue(vs.PersistTimeout)
+	data.Idletime = int64FromPtr(vs.Idletime)
+	data.ForceL7 = boolFromPtr(vs.ForceL7)
+	data.Bandwidth = int64FromPtr(vs.Bandwidth)
+	data.ConnsPerSecLimit = int64FromPtr(vs.ConnsPerSecLimit)
+	data.RequestsPerSecLimit = int64FromPtr(vs.RequestsPerSecLimit)
+	data.MaxConnsLimit = int64FromPtr(vs.MaxConnsLimit)
+
+	data.CheckType = types.StringValue(vs.CheckType)
+	data.CheckPort = types.StringValue(vs.CheckPort)
+	data.ChkInterval = int64FromPtr(vs.ChkInterval)
+	data.ChkTimeout = int64FromPtr(vs.ChkTimeout)
+	data.ChkRetryCount = int64FromPtr(vs.ChkRetryCount)
+	data.NeedHostName = boolFromPtr(vs.NeedHostName)
+	data.CheckUseHTTP11 = boolFromPtr(vs.CheckUseHTTP11)
+	data.CheckUseGet = types.StringValue(checkUseGetFromAPI(vs.CheckUseGet))
+	data.MatchLen = int64FromPtr(vs.MatchLen)
+	data.EnhancedHealthChecks = boolFromPtr(vs.EnhancedHealthChecks)
+
 	data.EspEnabled = boolFromPtr(vs.EspEnabled)
 	data.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
 	data.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
-	data.EspInputAuthMode = types.StringValue(vs.InputAuthMode)
-	data.EspOutputAuthMode = types.StringValue(vs.OutputAuthMode)
+	data.EspInputAuthMode = types.StringValue(espInputAuthModeFromAPI(vs.InputAuthMode))
+	data.EspOutputAuthMode = types.StringValue(espOutputAuthModeFromAPI(vs.OutputAuthMode))
 	data.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
 	data.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
 	data.EspLogs = boolFromPtr(vs.EspLogs)
-	data.WafInterceptMode = types.StringValue(vs.InterceptMode)
+	data.WafInterceptMode = types.StringValue(wafInterceptModeFromAPI(vs.InterceptMode))
 	data.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
 	data.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
 
