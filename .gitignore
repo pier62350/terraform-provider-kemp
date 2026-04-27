@@ -37,5 +37,9 @@ website/vendor
 *.env
 .kemp_env
 
-# Claude Code local state
-.claude/
+# Claude Code: ignore local state, but keep shared skills/agents/commands
+# under version control so they're available to anyone working in this repo.
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/commands/
