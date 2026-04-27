@@ -6,8 +6,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -44,6 +42,19 @@ func (d *VirtualServiceDataSource) Schema(_ context.Context, _ datasource.Schema
 			"enabled":                   schema.BoolAttribute{Computed: true},
 			"ssl_acceleration":          schema.BoolAttribute{Computed: true},
 			"cert_files":                schema.ListAttribute{Computed: true, ElementType: types.StringType},
+			"schedule":                  schema.StringAttribute{Computed: true},
+			"persist_timeout":           schema.StringAttribute{Computed: true},
+			"idletime":                  schema.Int64Attribute{Computed: true},
+			"force_l7":                  schema.BoolAttribute{Computed: true},
+			"check_type":                schema.StringAttribute{Computed: true},
+			"check_port":                schema.StringAttribute{Computed: true},
+			"chk_interval":              schema.Int64Attribute{Computed: true},
+			"chk_timeout":               schema.Int64Attribute{Computed: true},
+			"chk_retry_count":           schema.Int64Attribute{Computed: true},
+			"bandwidth":                 schema.Int64Attribute{Computed: true},
+			"conns_per_sec_limit":       schema.Int64Attribute{Computed: true},
+			"requests_per_sec_limit":    schema.Int64Attribute{Computed: true},
+			"max_conns_limit":           schema.Int64Attribute{Computed: true},
 			"esp_enabled":               schema.BoolAttribute{Computed: true},
 			"esp_allowed_hosts":         schema.StringAttribute{Computed: true},
 			"esp_allowed_directories":   schema.StringAttribute{Computed: true},
@@ -87,45 +98,7 @@ func (d *VirtualServiceDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	data.Id = types.StringValue(strconv.Itoa(int(vs.Index)))
-	data.Address = types.StringValue(vs.Address)
-	data.Port = types.StringValue(vs.Port)
-	data.Protocol = types.StringValue(vs.Protocol)
-	data.Type = types.StringValue(vs.VSType)
-	data.Nickname = types.StringValue(vs.NickName)
-	if vs.Enable != nil {
-		data.Enabled = types.BoolValue(*vs.Enable)
-	} else {
-		data.Enabled = types.BoolValue(false)
-	}
-	if vs.SSLAcceleration != nil {
-		data.SSLAcceleration = types.BoolValue(*vs.SSLAcceleration)
-	} else {
-		data.SSLAcceleration = types.BoolValue(false)
-	}
-	var certs []string
-	if vs.CertFile != "" {
-		certs = strings.Split(vs.CertFile, ",")
-		for i := range certs {
-			certs[i] = strings.TrimSpace(certs[i])
-		}
-	}
-	listVal, listDiags := types.ListValueFrom(ctx, types.StringType, certs)
-	resp.Diagnostics.Append(listDiags...)
-	data.CertFiles = listVal
-
-	data.EspEnabled = boolFromPtr(vs.EspEnabled)
-	data.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
-	data.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
-	data.EspInputAuthMode = types.StringValue(vs.InputAuthMode)
-	data.EspOutputAuthMode = types.StringValue(vs.OutputAuthMode)
-	data.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
-	data.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
-	data.EspLogs = boolFromPtr(vs.EspLogs)
-
-	data.WafInterceptMode = types.StringValue(vs.InterceptMode)
-	data.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
-	data.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
-
+	r := &VirtualServiceResource{}
+	resp.Diagnostics.Append(r.writeState(ctx, vs, &data)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

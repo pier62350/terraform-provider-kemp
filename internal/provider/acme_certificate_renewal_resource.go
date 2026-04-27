@@ -61,7 +61,7 @@ Note: ` + "`renewacmecert`" + ` is asynchronous. LoadMaster accepts the request 
 			},
 			"acme_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ACME provider: `1` for Let's Encrypt, `2` for DigiCert.",
+				MarkdownDescription: "ACME provider: `letsencrypt` or `digicert`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"triggers": schema.MapAttribute{
@@ -93,7 +93,7 @@ func (r *ACMECertificateRenewalResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	if err := r.client.RenewACMECertificate(ctx, data.CertName.ValueString(), data.ACMEType.ValueString()); err != nil {
+	if err := r.client.RenewACMECertificate(ctx, data.CertName.ValueString(), acmeTypeToAPI(data.ACMEType.ValueString())); err != nil {
 		resp.Diagnostics.AddError("Error renewing ACME certificate", err.Error())
 		return
 	}

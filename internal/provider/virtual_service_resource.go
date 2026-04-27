@@ -210,12 +210,12 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Computed:            true,
 			},
 			"esp_input_auth_mode": schema.StringAttribute{
-				MarkdownDescription: "Client-side authentication mode (e.g. `0` none, `1` basic auth, `2` form-based). Refer to LoadMaster docs for the full enum.",
+				MarkdownDescription: "Client-side authentication mode. Known values: `none`, `basic`, `form`. Other numeric values from LoadMaster docs are also accepted.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"esp_output_auth_mode": schema.StringAttribute{
-				MarkdownDescription: "Server-side authentication mode for the upstream (e.g. `0` none, `1` basic, `2` form, `4` KCD).",
+				MarkdownDescription: "Server-side authentication mode for the upstream. Known values: `none`, `basic`, `form`, `kcd` (Kerberos Constrained Delegation). Other numeric values from LoadMaster docs are also accepted.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -235,7 +235,7 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Computed:            true,
 			},
 			"waf_intercept_mode": schema.StringAttribute{
-				MarkdownDescription: "WAF intercept mode: `0` disabled, `1` Legacy WAF, `2` OWASP WAF.",
+				MarkdownDescription: "WAF intercept mode: `disabled`, `legacy` (Legacy WAF), or `owasp` (OWASP WAF).",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -346,10 +346,10 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 		p.AllowedDirectories = m.EspAllowedDirectories.ValueString()
 	}
 	if !m.EspInputAuthMode.IsNull() && !m.EspInputAuthMode.IsUnknown() {
-		p.InputAuthMode = m.EspInputAuthMode.ValueString()
+		p.InputAuthMode = espInputAuthModeToAPI(m.EspInputAuthMode.ValueString())
 	}
 	if !m.EspOutputAuthMode.IsNull() && !m.EspOutputAuthMode.IsUnknown() {
-		p.OutputAuthMode = m.EspOutputAuthMode.ValueString()
+		p.OutputAuthMode = espOutputAuthModeToAPI(m.EspOutputAuthMode.ValueString())
 	}
 	if !m.EspIncludeNestedGroups.IsNull() && !m.EspIncludeNestedGroups.IsUnknown() {
 		p.IncludeNestedGroups = boolPtr(m.EspIncludeNestedGroups.ValueBool())
@@ -362,7 +362,7 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	}
 
 	if !m.WafInterceptMode.IsNull() && !m.WafInterceptMode.IsUnknown() {
-		p.InterceptMode = m.WafInterceptMode.ValueString()
+		p.InterceptMode = wafInterceptModeToAPI(m.WafInterceptMode.ValueString())
 	}
 	if !m.WafBlockingParanoia.IsNull() && !m.WafBlockingParanoia.IsUnknown() {
 		v := int32(m.WafBlockingParanoia.ValueInt64())
@@ -420,13 +420,13 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.EspEnabled = boolFromPtr(vs.EspEnabled)
 	m.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
 	m.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
-	m.EspInputAuthMode = types.StringValue(vs.InputAuthMode)
-	m.EspOutputAuthMode = types.StringValue(vs.OutputAuthMode)
+	m.EspInputAuthMode = types.StringValue(espInputAuthModeFromAPI(vs.InputAuthMode))
+	m.EspOutputAuthMode = types.StringValue(espOutputAuthModeFromAPI(vs.OutputAuthMode))
 	m.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
 	m.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
 	m.EspLogs = boolFromPtr(vs.EspLogs)
 
-	m.WafInterceptMode = types.StringValue(vs.InterceptMode)
+	m.WafInterceptMode = types.StringValue(wafInterceptModeFromAPI(vs.InterceptMode))
 	m.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
 	m.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
 

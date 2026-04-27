@@ -54,7 +54,7 @@ Delete calls ` + "`delacmeconfig`" + ` which only succeeds if there are no ACME 
 		Attributes: map[string]schema.Attribute{
 			"acme_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ACME provider: `1` for Let's Encrypt, `2` for DigiCert.",
+				MarkdownDescription: "ACME provider: `letsencrypt` or `digicert`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"email": schema.StringAttribute{
@@ -102,7 +102,8 @@ func (r *ACMEAccountResource) Configure(_ context.Context, req resource.Configur
 }
 
 func (r *ACMEAccountResource) refresh(ctx context.Context, m *ACMEAccountModel) error {
-	info, err := r.client.GetACMEAccountInfo(ctx, m.ACMEType.ValueString())
+	apiType := acmeTypeToAPI(m.ACMEType.ValueString())
+	info, err := r.client.GetACMEAccountInfo(ctx, apiType)
 	if err != nil {
 		return err
 	}
@@ -111,11 +112,11 @@ func (r *ACMEAccountResource) refresh(ctx context.Context, m *ACMEAccountModel) 
 	if m.Email.IsNull() && info.AccountEmail != "" {
 		m.Email = types.StringValue(info.AccountEmail)
 	}
-	url, err := r.client.GetACMEDirectoryURL(ctx, m.ACMEType.ValueString())
+	url, err := r.client.GetACMEDirectoryURL(ctx, apiType)
 	if err == nil {
 		m.DirectoryURL = types.StringValue(url)
 	}
-	period, err := r.client.GetACMERenewPeriod(ctx, m.ACMEType.ValueString())
+	period, err := r.client.GetACMERenewPeriod(ctx, apiType)
 	if err == nil {
 		m.RenewPeriod = types.Int64Value(int64(period))
 	}
@@ -129,8 +130,10 @@ func (r *ACMEAccountResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	apiType := acmeTypeToAPI(data.ACMEType.ValueString())
+
 	if !data.DirectoryURL.IsNull() && !data.DirectoryURL.IsUnknown() && data.DirectoryURL.ValueString() != "" {
-		if err := r.client.SetACMEDirectoryURL(ctx, data.ACMEType.ValueString(), data.DirectoryURL.ValueString()); err != nil {
+		if err := r.client.SetACMEDirectoryURL(ctx, apiType, data.DirectoryURL.ValueString()); err != nil {
 			resp.Diagnostics.AddError("Error setting ACME directory URL", err.Error())
 			return
 		}
@@ -149,13 +152,13 @@ func (r *ACMEAccountResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
-	if err := r.client.RegisterACMEAccount(ctx, data.ACMEType.ValueString(), data.Email.ValueString()); err != nil {
+	if err := r.client.RegisterACMEAccount(ctx, apiType, data.Email.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Error registering ACME account", err.Error())
 		return
 	}
 
 	if !data.RenewPeriod.IsNull() && !data.RenewPeriod.IsUnknown() {
-		if err := r.client.SetACMERenewPeriod(ctx, data.ACMEType.ValueString(), int32(data.RenewPeriod.ValueInt64())); err != nil {
+		if err := r.client.SetACMERenewPeriod(ctx, apiType, int32(data.RenewPeriod.ValueInt64())); err != nil {
 			resp.Diagnostics.AddError("Error setting ACME renew period", err.Error())
 			return
 		}
@@ -190,14 +193,16 @@ func (r *ACMEAccountResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	apiType := acmeTypeToAPI(data.ACMEType.ValueString())
+
 	if !data.DirectoryURL.IsNull() && !data.DirectoryURL.IsUnknown() && data.DirectoryURL.ValueString() != "" {
-		if err := r.client.SetACMEDirectoryURL(ctx, data.ACMEType.ValueString(), data.DirectoryURL.ValueString()); err != nil {
+		if err := r.client.SetACMEDirectoryURL(ctx, apiType, data.DirectoryURL.ValueString()); err != nil {
 			resp.Diagnostics.AddError("Error updating ACME directory URL", err.Error())
 			return
 		}
 	}
 	if !data.RenewPeriod.IsNull() && !data.RenewPeriod.IsUnknown() {
-		if err := r.client.SetACMERenewPeriod(ctx, data.ACMEType.ValueString(), int32(data.RenewPeriod.ValueInt64())); err != nil {
+		if err := r.client.SetACMERenewPeriod(ctx, apiType, int32(data.RenewPeriod.ValueInt64())); err != nil {
 			resp.Diagnostics.AddError("Error updating ACME renew period", err.Error())
 			return
 		}
@@ -227,16 +232,18 @@ func (r *ACMEAccountResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteACMEConfig(ctx, data.ACMEType.ValueString()); err != nil {
+	if err := r.client.DeleteACMEConfig(ctx, acmeTypeToAPI(data.ACMEType.ValueString())); err != nil {
 		resp.Diagnostics.AddError("Error deleting ACME config",
 			fmt.Sprintf("%s\n\nNote: delacmeconfig fails if any ACME-issued certs still exist for this provider type. Remove kemp_acme_certificate resources first.", err.Error()))
 	}
 }
 
-// ImportState accepts the acme_type as the import ID ("1" or "2").
+// ImportState accepts the acme_type as the import ID ("letsencrypt", "digicert",
+// or legacy numeric "1", "2").
 func (r *ACMEAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("acme_type"), req.ID)...)
-	data := ACMEAccountModel{ACMEType: types.StringValue(req.ID)}
+	friendly := acmeTypeFromAPI(acmeTypeToAPI(req.ID))
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("acme_type"), friendly)...)
+	data := ACMEAccountModel{ACMEType: types.StringValue(friendly)}
 	if err := r.refresh(ctx, &data); err != nil {
 		resp.Diagnostics.AddError("Error importing ACME account", err.Error())
 		return

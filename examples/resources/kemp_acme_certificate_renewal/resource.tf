@@ -3,7 +3,7 @@
 
 resource "kemp_acme_certificate_renewal" "force" {
   cert_name = kemp_acme_certificate.my_cert.name
-  acme_type = "1"
+  acme_type = "letsencrypt"
 
   triggers = {
     version = "1"

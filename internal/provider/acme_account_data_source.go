@@ -41,7 +41,7 @@ func (d *ACMEAccountDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Reads the ACME account configuration registered on a Kemp LoadMaster for a given provider type.",
 		Attributes: map[string]schema.Attribute{
-			"acme_type":         schema.StringAttribute{Required: true, MarkdownDescription: "ACME provider type: `1` for Let's Encrypt, `2` for DigiCert."},
+			"acme_type":         schema.StringAttribute{Required: true, MarkdownDescription: "ACME provider: `letsencrypt` or `digicert`."},
 			"account_id":        schema.StringAttribute{Computed: true, MarkdownDescription: "Registered ACME account identifier."},
 			"account_directory": schema.StringAttribute{Computed: true, MarkdownDescription: "Effective ACME directory URL the account is registered against."},
 			"directory_url":     schema.StringAttribute{Computed: true, MarkdownDescription: "Configured ACME directory endpoint URL."},
@@ -69,7 +69,9 @@ func (d *ACMEAccountDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	info, err := d.client.GetACMEAccountInfo(ctx, data.ACMEType.ValueString())
+	apiType := acmeTypeToAPI(data.ACMEType.ValueString())
+
+	info, err := d.client.GetACMEAccountInfo(ctx, apiType)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading ACME account", err.Error())
 		return
@@ -78,13 +80,13 @@ func (d *ACMEAccountDataSource) Read(ctx context.Context, req datasource.ReadReq
 	data.AccountID = types.StringValue(info.AccountID)
 	data.AccountDirectory = types.StringValue(info.AccountDirectory)
 
-	if url, err := d.client.GetACMEDirectoryURL(ctx, data.ACMEType.ValueString()); err == nil {
+	if url, err := d.client.GetACMEDirectoryURL(ctx, apiType); err == nil {
 		data.DirectoryURL = types.StringValue(url)
 	} else {
 		data.DirectoryURL = types.StringValue("")
 	}
 
-	if period, err := d.client.GetACMERenewPeriod(ctx, data.ACMEType.ValueString()); err == nil {
+	if period, err := d.client.GetACMERenewPeriod(ctx, apiType); err == nil {
 		data.RenewPeriod = types.Int64Value(int64(period))
 	} else {
 		data.RenewPeriod = types.Int64Value(0)

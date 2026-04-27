@@ -79,8 +79,8 @@ For wildcard certificates (CN starting with ` + "`*.`" + `), set ` + "`dns_api`"
 			"acme_type": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "ACME provider: `1` for Let's Encrypt (default), `2` for DigiCert.",
-				Default:             stringdefault.StaticString("1"),
+				MarkdownDescription: "ACME provider: `letsencrypt` (default) or `digicert`.",
+				Default:             stringdefault.StaticString("letsencrypt"),
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"key_size": schema.Int64Attribute{
@@ -163,7 +163,7 @@ func (r *ACMECertificateResource) Create(ctx context.Context, req resource.Creat
 	params := loadmaster.AddACMECertParams{
 		CommonName:       data.CommonName.ValueString(),
 		VirtualServiceID: data.VirtualServiceId.ValueString(),
-		ACMEType:         data.ACMEType.ValueString(),
+		ACMEType:         acmeTypeToAPI(data.ACMEType.ValueString()),
 		KeySize:          int(data.KeySize.ValueInt64()),
 		DNSAPI:           data.DNSAPI.ValueString(),
 		DNSAPIParams:     data.DNSAPIParams.ValueString(),
@@ -178,7 +178,7 @@ func (r *ACMECertificateResource) Create(ctx context.Context, req resource.Creat
 	// Best-effort post-create read; if the cert isn't visible yet (issuance
 	// pending), we still persist the configuration so the next refresh can
 	// pick it up.
-	info, err := r.client.GetACMECertificate(ctx, data.Name.ValueString(), data.ACMEType.ValueString())
+	info, err := r.client.GetACMECertificate(ctx, data.Name.ValueString(), acmeTypeToAPI(data.ACMEType.ValueString()))
 	if err == nil {
 		r.writeState(info, &data)
 	} else {
@@ -199,7 +199,7 @@ func (r *ACMECertificateResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	info, err := r.client.GetACMECertificate(ctx, data.Name.ValueString(), data.ACMEType.ValueString())
+	info, err := r.client.GetACMECertificate(ctx, data.Name.ValueString(), acmeTypeToAPI(data.ACMEType.ValueString()))
 	if err != nil {
 		if loadmaster.IsNotFound(err) {
 			resp.State.RemoveResource(ctx)
@@ -227,24 +227,22 @@ func (r *ACMECertificateResource) Delete(ctx context.Context, req resource.Delet
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteACMECertificate(ctx, data.Name.ValueString(), data.ACMEType.ValueString()); err != nil && !loadmaster.IsNotFound(err) {
+	if err := r.client.DeleteACMECertificate(ctx, data.Name.ValueString(), acmeTypeToAPI(data.ACMEType.ValueString())); err != nil && !loadmaster.IsNotFound(err) {
 		resp.Diagnostics.AddError("Error deleting ACME certificate", err.Error())
 	}
 }
 
-// ImportState accepts "<name>" (assumes acme_type=1) or "<name>/<acme_type>".
-// The resulting state has placeholder values for required attributes that
-// can't be read back from LoadMaster (common_name, virtual_service_id,
-// dns_api_params, email); a subsequent plan will show the diff so the user
-// can fill them in to match their HCL.
+// ImportState accepts "<name>" (assumes letsencrypt) or "<name>/<acme_type>"
+// where acme_type may be a friendly name ("letsencrypt", "digicert") or the
+// legacy numeric form ("1", "2").
 func (r *ACMECertificateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	name, acmeType := req.ID, "1"
+	name, acmeType := req.ID, "letsencrypt"
 	if i := strings.Index(req.ID, "/"); i != -1 {
 		name = req.ID[:i]
-		acmeType = req.ID[i+1:]
+		acmeType = acmeTypeFromAPI(acmeTypeToAPI(req.ID[i+1:]))
 	}
 
-	info, err := r.client.GetACMECertificate(ctx, name, acmeType)
+	info, err := r.client.GetACMECertificate(ctx, name, acmeTypeToAPI(acmeType))
 	if err != nil {
 		resp.Diagnostics.AddError("Error importing ACME certificate", err.Error())
 		return

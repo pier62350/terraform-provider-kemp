@@ -44,7 +44,7 @@ func (d *ACMECertificateDataSource) Schema(_ context.Context, _ datasource.Schem
 		MarkdownDescription: "Reads an ACME-issued certificate stored on a Kemp LoadMaster by name.",
 		Attributes: map[string]schema.Attribute{
 			"name":                   schema.StringAttribute{Required: true, MarkdownDescription: "Name of the ACME certificate as stored on the LoadMaster."},
-			"acme_type":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "ACME provider type: `1` for Let's Encrypt (default), `2` for DigiCert."},
+			"acme_type":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "ACME provider: `letsencrypt` (default) or `digicert`."},
 			"domain_name":            schema.StringAttribute{Computed: true, MarkdownDescription: "Domain name on the issued certificate."},
 			"expiry_date":            schema.StringAttribute{Computed: true, MarkdownDescription: "Expiry timestamp as reported by LoadMaster."},
 			"type":                   schema.StringAttribute{Computed: true, MarkdownDescription: "Cert algorithm (`rsa`, `ecc`)."},
@@ -73,18 +73,19 @@ func (d *ACMECertificateDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	acmeType := data.ACMEType.ValueString()
-	if acmeType == "" {
-		acmeType = "1"
+	friendly := data.ACMEType.ValueString()
+	if friendly == "" {
+		friendly = "letsencrypt"
 	}
+	friendly = acmeTypeFromAPI(acmeTypeToAPI(friendly))
 
-	info, err := d.client.GetACMECertificate(ctx, data.Name.ValueString(), acmeType)
+	info, err := d.client.GetACMECertificate(ctx, data.Name.ValueString(), acmeTypeToAPI(friendly))
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading ACME certificate", err.Error())
 		return
 	}
 
-	data.ACMEType = types.StringValue(acmeType)
+	data.ACMEType = types.StringValue(friendly)
 	data.DomainName = types.StringValue(info.DomainName)
 	data.ExpiryDate = types.StringValue(info.ExpiryDate)
 	data.Type = types.StringValue(info.Type)
