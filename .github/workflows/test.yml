@@ -1,0 +1,27 @@
+# Run unit tests + go vet on every PR and push to main. Acceptance tests
+# require a live LoadMaster and run only via `make testacc` locally.
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go mod download
+      - run: go build -v ./...
+      - run: go vet ./...
+      - run: go test -v -cover -timeout=120s ./...
