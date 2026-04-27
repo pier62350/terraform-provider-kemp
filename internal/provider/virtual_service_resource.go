@@ -53,6 +53,11 @@ type VirtualServiceResourceModel struct {
 	EspIncludeNestedGroups types.Bool   `tfsdk:"esp_include_nested_groups"`
 	EspDisplayPubPriv      types.Bool   `tfsdk:"esp_display_pub_priv"`
 	EspLogs                types.Bool   `tfsdk:"esp_logs"`
+
+	// WAF
+	WafInterceptMode    types.String `tfsdk:"waf_intercept_mode"`
+	WafBlockingParanoia types.Int64  `tfsdk:"waf_blocking_paranoia"`
+	WafAlertThreshold   types.Int64  `tfsdk:"waf_alert_threshold"`
 }
 
 func (r *VirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -149,6 +154,21 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+			"waf_intercept_mode": schema.StringAttribute{
+				MarkdownDescription: "WAF intercept mode: `0` disabled, `1` Legacy WAF, `2` OWASP WAF.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"waf_blocking_paranoia": schema.Int64Attribute{
+				MarkdownDescription: "OWASP paranoia level (0-4). Higher = more rules trigger, more false positives.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"waf_alert_threshold": schema.Int64Attribute{
+				MarkdownDescription: "Anomaly score that triggers blocking. Set to 0 for detection-only (audit) mode.",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -212,6 +232,18 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	if !m.EspLogs.IsNull() && !m.EspLogs.IsUnknown() {
 		p.EspLogs = boolPtr(m.EspLogs.ValueBool())
 	}
+
+	if !m.WafInterceptMode.IsNull() && !m.WafInterceptMode.IsUnknown() {
+		p.InterceptMode = m.WafInterceptMode.ValueString()
+	}
+	if !m.WafBlockingParanoia.IsNull() && !m.WafBlockingParanoia.IsUnknown() {
+		v := int32(m.WafBlockingParanoia.ValueInt64())
+		p.BlockingParanoia = &v
+	}
+	if !m.WafAlertThreshold.IsNull() && !m.WafAlertThreshold.IsUnknown() {
+		v := int32(m.WafAlertThreshold.ValueInt64())
+		p.AlertThreshold = &v
+	}
 	return p, diags
 }
 
@@ -251,6 +283,10 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
 	m.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
 	m.EspLogs = boolFromPtr(vs.EspLogs)
+
+	m.WafInterceptMode = types.StringValue(vs.InterceptMode)
+	m.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
+	m.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
 
 	return diags
 }

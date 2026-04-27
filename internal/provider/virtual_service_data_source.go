@@ -52,6 +52,9 @@ func (d *VirtualServiceDataSource) Schema(_ context.Context, _ datasource.Schema
 			"esp_include_nested_groups": schema.BoolAttribute{Computed: true},
 			"esp_display_pub_priv":      schema.BoolAttribute{Computed: true},
 			"esp_logs":                  schema.BoolAttribute{Computed: true},
+			"waf_intercept_mode":        schema.StringAttribute{Computed: true},
+			"waf_blocking_paranoia":     schema.Int64Attribute{Computed: true},
+			"waf_alert_threshold":       schema.Int64Attribute{Computed: true},
 		},
 	}
 }
@@ -119,6 +122,10 @@ func (d *VirtualServiceDataSource) Read(ctx context.Context, req datasource.Read
 	data.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
 	data.EspDisplayPubPriv = boolFromPtr(vs.DisplayPubPriv)
 	data.EspLogs = boolFromPtr(vs.EspLogs)
+
+	data.WafInterceptMode = types.StringValue(vs.InterceptMode)
+	data.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
+	data.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

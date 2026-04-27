@@ -151,3 +151,12 @@ func boolFromPtr(b *bool) types.Bool {
 	}
 	return types.BoolValue(*b)
 }
+
+// int64FromPtr converts a *int32 from the API into a types.Int64, mapping
+// nil to zero.
+func int64FromPtr(p *int32) types.Int64 {
+	if p == nil {
+		return types.Int64Value(0)
+	}
+	return types.Int64Value(int64(*p))
+}

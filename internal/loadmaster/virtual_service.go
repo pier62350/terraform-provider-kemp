@@ -28,6 +28,11 @@ type VirtualService struct {
 	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`
 	DisplayPubPriv      *bool  `json:"DisplayPubPriv,omitempty"`
 	EspLogs             *bool  `json:"EspLogs,omitempty"`
+
+	// WAF
+	InterceptMode    string `json:"InterceptMode,omitempty"`
+	BlockingParanoia *int32 `json:"BlockingParanoia,omitempty"`
+	AlertThreshold   *int32 `json:"AlertThreshold,omitempty"`
 }
 
 // VirtualServiceParams are the optional knobs for create/modify.
@@ -48,6 +53,11 @@ type VirtualServiceParams struct {
 	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`
 	DisplayPubPriv      *bool  `json:"DisplayPubPriv,omitempty"`
 	EspLogs             *bool  `json:"EspLogs,omitempty"`
+
+	// WAF
+	InterceptMode    string `json:"InterceptMode,omitempty"`
+	BlockingParanoia *int32 `json:"BlockingParanoia,omitempty"`
+	AlertThreshold   *int32 `json:"AlertThreshold,omitempty"`
 }
 
 type vsResponse struct {
