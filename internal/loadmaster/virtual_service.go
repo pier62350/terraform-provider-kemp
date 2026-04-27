@@ -47,12 +47,17 @@ func (c *Client) AddVirtualService(ctx context.Context, address, port, protocol 
 }
 
 // ShowVirtualService reads a single VS by its numeric Index.
+//
+// LoadMaster's parser interprets a numeric `vs` as the Index automatically;
+// the "!N" prefix syntax is rejected by some firmware revs (it falls back to
+// address-mode parsing and errors on missing `port`). Bare numeric Index is
+// the safe form across versions.
 func (c *Client) ShowVirtualService(ctx context.Context, id string) (*VirtualService, error) {
 	type body struct {
 		VS string `json:"vs"`
 	}
 	var resp vsResponse
-	if err := c.call(ctx, "showvs", body{VS: "!" + id}, &resp); err != nil {
+	if err := c.call(ctx, "showvs", body{VS: id}, &resp); err != nil {
 		return nil, err
 	}
 	return &resp.VirtualService, nil
@@ -65,7 +70,7 @@ func (c *Client) ModifyVirtualService(ctx context.Context, id string, p VirtualS
 		VirtualServiceParams
 	}
 	var resp vsResponse
-	if err := c.call(ctx, "modvs", body{VS: "!" + id, VirtualServiceParams: p}, &resp); err != nil {
+	if err := c.call(ctx, "modvs", body{VS: id, VirtualServiceParams: p}, &resp); err != nil {
 		return nil, err
 	}
 	return &resp.VirtualService, nil
@@ -76,5 +81,5 @@ func (c *Client) DeleteVirtualService(ctx context.Context, id string) error {
 	type body struct {
 		VS string `json:"vs"`
 	}
-	return c.call(ctx, "delvs", body{VS: "!" + id}, nil)
+	return c.call(ctx, "delvs", body{VS: id}, nil)
 }

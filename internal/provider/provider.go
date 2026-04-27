@@ -116,6 +116,7 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewVirtualServiceResource,
 		NewRealServerResource,
+		NewCertificateResource,
 	}
 }
 

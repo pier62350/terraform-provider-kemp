@@ -37,16 +37,17 @@ type rsListResponse struct {
 	Rs []RealServer `json:"Rs"`
 }
 
-// AddRealServer attaches a backend to the given VS.
+// AddRealServer attaches a backend to the given VS. The VS is referenced
+// by bare numeric Index; the RS port goes in a field named "rsport".
 func (c *Client) AddRealServer(ctx context.Context, vsID, address, port string, p RealServerParams) (*RealServer, error) {
 	type body struct {
-		VS   string `json:"vs"`
-		Rs   string `json:"rs"`
-		RsP  string `json:"rsport"`
+		VS    string `json:"vs"`
+		Rs    string `json:"rs"`
+		RSPrt string `json:"rsport"`
 		RealServerParams
 	}
 	var resp rsListResponse
-	if err := c.call(ctx, "addrs", body{VS: "!" + vsID, Rs: address, RsP: port, RealServerParams: p}, &resp); err != nil {
+	if err := c.call(ctx, "addrs", body{VS: vsID, Rs: address, RSPrt: port, RealServerParams: p}, &resp); err != nil {
 		return nil, err
 	}
 	if len(resp.Rs) == 0 {
@@ -55,14 +56,16 @@ func (c *Client) AddRealServer(ctx context.Context, vsID, address, port string, 
 	return &resp.Rs[len(resp.Rs)-1], nil
 }
 
-// ShowRealServer reads an RS by VS Index + RS Index.
+// ShowRealServer reads an RS by VS Index + RS Index. VS uses the bare
+// numeric form; RS uses the "!N" Index form (without it Kemp tries to
+// match by address).
 func (c *Client) ShowRealServer(ctx context.Context, vsID, rsID string) (*RealServer, error) {
 	type body struct {
 		VS string `json:"vs"`
 		Rs string `json:"rs"`
 	}
 	var resp rsListResponse
-	if err := c.call(ctx, "showrs", body{VS: "!" + vsID, Rs: "!" + rsID}, &resp); err != nil {
+	if err := c.call(ctx, "showrs", body{VS: vsID, Rs: "!" + rsID}, &resp); err != nil {
 		return nil, err
 	}
 	if len(resp.Rs) == 0 {
@@ -79,7 +82,7 @@ func (c *Client) ModifyRealServer(ctx context.Context, vsID, rsID string, p Real
 		RealServerParams
 	}
 	var resp rsListResponse
-	if err := c.call(ctx, "modrs", body{VS: "!" + vsID, Rs: "!" + rsID, RealServerParams: p}, &resp); err != nil {
+	if err := c.call(ctx, "modrs", body{VS: vsID, Rs: "!" + rsID, RealServerParams: p}, &resp); err != nil {
 		return nil, err
 	}
 	if len(resp.Rs) == 0 {
@@ -94,5 +97,5 @@ func (c *Client) DeleteRealServer(ctx context.Context, vsID, rsID string) error 
 		VS string `json:"vs"`
 		Rs string `json:"rs"`
 	}
-	return c.call(ctx, "delrs", body{VS: "!" + vsID, Rs: "!" + rsID}, nil)
+	return c.call(ctx, "delrs", body{VS: vsID, Rs: "!" + rsID}, nil)
 }
