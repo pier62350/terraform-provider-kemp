@@ -131,6 +131,7 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewOwaspCustomDataResource,
 		NewWafCustomRuleResource,
 		NewWafCustomDataResource,
+		NewACMEAccountResource,
 	}
 }
 
