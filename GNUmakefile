@@ -10,7 +10,7 @@ lint:
 	golangci-lint run
 
 generate:
-	cd tools; go generate ./...
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.22.0 generate --provider-name kemp
 
 fmt:
 	gofmt -s -w -e .
