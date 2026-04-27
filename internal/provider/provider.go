@@ -138,7 +138,23 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 func (p *KempProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewVirtualServiceDataSource,
+		NewSubVirtualServiceDataSource,
 		NewRealServerDataSource,
+		NewCertificateDataSource,
+		NewACMECertificateDataSource,
+		NewACMEAccountDataSource,
+		NewMatchContentRuleDataSource,
+		NewAddHeaderRuleDataSource,
+		NewDeleteHeaderRuleDataSource,
+		NewReplaceHeaderRuleDataSource,
+		NewModifyURLRuleDataSource,
+		NewReplaceBodyRuleDataSource,
+		NewVirtualServiceRuleDataSource,
+		NewVirtualServiceWafRuleDataSource,
+		NewOwaspCustomRuleDataSource,
+		NewOwaspCustomDataDataSource,
+		NewWafCustomRuleDataSource,
+		NewWafCustomDataDataSource,
 	}
 }
 

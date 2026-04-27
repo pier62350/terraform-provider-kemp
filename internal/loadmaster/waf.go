@@ -77,3 +77,39 @@ func (c *Client) DeleteWafCustomData(ctx context.Context, filename string) error
 	}
 	return c.call(ctx, "delwafcustomdata", body{Filename: filename}, nil)
 }
+
+// VerifyOwaspCustomRule confirms a custom OWASP rule file exists on the
+// LoadMaster by issuing a download and discarding the content.
+func (c *Client) VerifyOwaspCustomRule(ctx context.Context, filename string) error {
+	type body struct {
+		Filename string `json:"filename"`
+	}
+	return c.call(ctx, "downloadowaspcustomrule", body{Filename: filename}, nil)
+}
+
+// VerifyOwaspCustomData confirms a custom OWASP data file exists on the
+// LoadMaster by issuing a download and discarding the content.
+func (c *Client) VerifyOwaspCustomData(ctx context.Context, filename string) error {
+	type body struct {
+		Filename string `json:"filename"`
+	}
+	return c.call(ctx, "downloadowaspcustomdata", body{Filename: filename}, nil)
+}
+
+// VerifyWafCustomRule confirms a commercial-WAF custom rule file exists on the
+// LoadMaster.
+func (c *Client) VerifyWafCustomRule(ctx context.Context, filename string) error {
+	type body struct {
+		Filename string `json:"filename"`
+	}
+	return c.call(ctx, "downloadwafcustomrule", body{Filename: filename}, nil)
+}
+
+// VerifyWafCustomData confirms a commercial-WAF custom data file exists on the
+// LoadMaster.
+func (c *Client) VerifyWafCustomData(ctx context.Context, filename string) error {
+	type body struct {
+		Filename string `json:"filename"`
+	}
+	return c.call(ctx, "downloadwafcustomdata", body{Filename: filename}, nil)
+}
