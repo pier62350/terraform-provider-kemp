@@ -115,6 +115,7 @@ func (p *KempProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewVirtualServiceResource,
+		NewSubVirtualServiceResource,
 		NewRealServerResource,
 		NewCertificateResource,
 		NewACMECertificateResource,
