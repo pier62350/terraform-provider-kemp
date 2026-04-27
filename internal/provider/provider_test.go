@@ -30,9 +30,9 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-// Example acceptance test — creates a fresh virtual service at 192.168.1.200
-// (an address chosen to NOT collide with the protected 192.168.1.55 /
-// 192.168.1.251 services on the dev LoadMaster).
+// Example acceptance test — creates a fresh virtual service at 10.0.0.100.
+// Acceptance tests must NOT collide with any pre-existing virtual services
+// on the LoadMaster they target.
 func TestAccVirtualServiceResource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -41,7 +41,7 @@ func TestAccVirtualServiceResource_basic(t *testing.T) {
 			{
 				Config: `
 resource "kemp_virtual_service" "test" {
-  address  = "192.168.1.200"
+  address  = "10.0.0.100"
   port     = "8080"
   protocol = "tcp"
   type     = "http"
@@ -50,7 +50,7 @@ resource "kemp_virtual_service" "test" {
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("kemp_virtual_service.test", "address", "192.168.1.200"),
+					resource.TestCheckResourceAttr("kemp_virtual_service.test", "address", "10.0.0.100"),
 					resource.TestCheckResourceAttr("kemp_virtual_service.test", "port", "8080"),
 					resource.TestCheckResourceAttr("kemp_virtual_service.test", "protocol", "tcp"),
 					resource.TestCheckResourceAttr("kemp_virtual_service.test", "nickname", "tf-acc-test"),

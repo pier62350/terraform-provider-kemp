@@ -33,7 +33,7 @@ terraform {
 }
 
 provider "kemp" {
-  host    = "https://192.168.1.155:9443"  # or use KEMP_HOST
+  host    = "https://10.0.0.5:9443"  # or use KEMP_HOST
   api_key = var.kemp_api_key              # or use KEMP_API_KEY
 
   # Alternative: basic auth
@@ -55,7 +55,7 @@ Environment variables (preferred for credentials):
 
 ```hcl
 resource "kemp_virtual_service" "demo" {
-  address  = "192.168.1.200"
+  address  = "10.0.0.100"
   port     = "443"
   protocol = "tcp"
   type     = "http"

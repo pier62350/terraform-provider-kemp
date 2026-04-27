@@ -69,7 +69,7 @@ func WithBasicAuth(user, pass string) Option {
 }
 
 // NewClient builds a Client targeting the given LoadMaster base URL
-// (e.g. "https://192.168.1.155:9443"). Options override the defaults.
+// (e.g. "https://10.0.0.5:9443"). Options override the defaults.
 func NewClient(baseURL string, opts ...Option) *Client {
 	c := &Client{
 		baseURL: baseURL,

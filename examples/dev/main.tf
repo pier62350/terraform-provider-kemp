@@ -9,9 +9,8 @@
 #   terraform apply
 #   terraform destroy
 #
-# Safety: this file targets a NEW virtual service at 192.168.1.200.
-# Do not use 192.168.1.55 or 192.168.1.251 — those are pre-existing on the
-# shared dev LoadMaster and must be preserved.
+# Safety: this targets a brand-new virtual service. Never apply against
+# addresses already in use on the target LoadMaster.
 
 terraform {
   required_providers {
@@ -26,7 +25,7 @@ provider "kemp" {
 }
 
 resource "kemp_virtual_service" "smoke" {
-  address  = "192.168.1.200"
+  address  = "10.0.0.100"
   port     = "8080"
   protocol = "tcp"
   type     = "http"
@@ -36,7 +35,7 @@ resource "kemp_virtual_service" "smoke" {
 
 resource "kemp_real_server" "smoke" {
   virtual_service_id = kemp_virtual_service.smoke.id
-  address            = "10.0.0.10"
+  address            = "10.0.1.10"
   port               = "8080"
   weight             = 1000
   enable             = true

@@ -1,5 +1,5 @@
 resource "kemp_virtual_service" "example" {
-  address  = "192.168.1.200"
+  address  = "10.0.0.100"
   port     = "443"
   protocol = "tcp"
   type     = "http"

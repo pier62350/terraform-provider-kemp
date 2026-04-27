@@ -10,7 +10,7 @@ terraform {
 # All credentials are typically read from environment variables:
 #   KEMP_HOST, KEMP_API_KEY (or KEMP_USERNAME/KEMP_PASSWORD)
 provider "kemp" {
-  host    = "https://192.168.1.155:9443"
+  host    = "https://10.0.0.5:9443"
   api_key = var.kemp_api_key
 }
 

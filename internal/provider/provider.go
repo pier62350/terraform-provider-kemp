@@ -41,7 +41,7 @@ func (p *KempProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 		MarkdownDescription: "Provider for Progress Kemp LoadMaster.",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				MarkdownDescription: "Base URL of the LoadMaster, including scheme and port (e.g. `https://192.168.1.155:9443`). May also be set via the `KEMP_HOST` environment variable.",
+				MarkdownDescription: "Base URL of the LoadMaster, including scheme and port (e.g. `https://10.0.0.5:9443`). May also be set via the `KEMP_HOST` environment variable.",
 				Optional:            true,
 			},
 			"api_key": schema.StringAttribute{
@@ -82,7 +82,7 @@ func (p *KempProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		resp.Diagnostics.AddAttributeError(
 			path.Root("host"),
 			"Missing LoadMaster host",
-			"Set the `host` attribute or the KEMP_HOST environment variable to the base URL of the LoadMaster (e.g. https://192.168.1.155:9443).",
+			"Set the `host` attribute or the KEMP_HOST environment variable to the base URL of the LoadMaster (e.g. https://10.0.0.5:9443).",
 		)
 	}
 	if apiKey == "" && (username == "" || password == "") {
