@@ -126,6 +126,11 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewModifyURLRuleResource,
 		NewReplaceBodyRuleResource,
 		NewVirtualServiceRuleResource,
+		NewVirtualServiceWafRuleResource,
+		NewOwaspCustomRuleResource,
+		NewOwaspCustomDataResource,
+		NewWafCustomRuleResource,
+		NewWafCustomDataResource,
 	}
 }
 
