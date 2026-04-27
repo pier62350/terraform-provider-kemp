@@ -199,3 +199,21 @@ func (c *Client) DeleteACMEConfig(ctx context.Context, acmeType string) error {
 	}
 	return c.call(ctx, "delacmeconfig", body{ACMEType: acmeType}, nil)
 }
+
+// SetACMEKID sets the DigiCert Key ID for acmetype "2".
+func (c *Client) SetACMEKID(ctx context.Context, kid string) error {
+	type body struct {
+		KID      string `json:"kid"`
+		ACMEType string `json:"acmetype"`
+	}
+	return c.call(ctx, "setacmekid", body{KID: kid, ACMEType: "2"}, nil)
+}
+
+// SetACMEHMAC sets the DigiCert HMAC for acmetype "2".
+func (c *Client) SetACMEHMAC(ctx context.Context, hmac string) error {
+	type body struct {
+		HMAC     string `json:"hmac"`
+		ACMEType string `json:"acmetype"`
+	}
+	return c.call(ctx, "setacmehmac", body{HMAC: hmac, ACMEType: "2"}, nil)
+}

@@ -44,6 +44,21 @@ type VirtualServiceResourceModel struct {
 	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
 	CertFiles       types.List   `tfsdk:"cert_files"`
 
+	// Standard options
+	Schedule            types.String `tfsdk:"schedule"`
+	PersistTimeout      types.String `tfsdk:"persist_timeout"`
+	Idletime            types.Int64  `tfsdk:"idletime"`
+	ForceL7             types.Bool   `tfsdk:"force_l7"`
+	CheckType           types.String `tfsdk:"check_type"`
+	CheckPort           types.String `tfsdk:"check_port"`
+	ChkInterval         types.Int64  `tfsdk:"chk_interval"`
+	ChkTimeout          types.Int64  `tfsdk:"chk_timeout"`
+	ChkRetryCount       types.Int64  `tfsdk:"chk_retry_count"`
+	Bandwidth           types.Int64  `tfsdk:"bandwidth"`
+	ConnsPerSecLimit    types.Int64  `tfsdk:"conns_per_sec_limit"`
+	RequestsPerSecLimit types.Int64  `tfsdk:"requests_per_sec_limit"`
+	MaxConnsLimit       types.Int64  `tfsdk:"max_conns_limit"`
+
 	// ESP
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
 	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
@@ -111,6 +126,71 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"cert_files": schema.ListAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Names of certificates (as stored on the LoadMaster) attached to this virtual service. Multiple entries enable SNI: LoadMaster picks the cert whose subject matches the client's TLS SNI hostname. Order matters — the first cert is the default.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"schedule": schema.StringAttribute{
+				MarkdownDescription: "Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"persist_timeout": schema.StringAttribute{
+				MarkdownDescription: "Persistence timeout in seconds. `0` disables persistence.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"idletime": schema.Int64Attribute{
+				MarkdownDescription: "Idle connection timeout in seconds. Default is 660.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"force_l7": schema.BoolAttribute{
+				MarkdownDescription: "Force Layer-7 processing even when the VS is configured as Layer-4.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"check_type": schema.StringAttribute{
+				MarkdownDescription: "Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `pop3`, `imap`, `rdp`, `snmp`, `ldap`, `none`, etc.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"check_port": schema.StringAttribute{
+				MarkdownDescription: "Port used for health checks. `0` means use the VS port.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"chk_interval": schema.Int64Attribute{
+				MarkdownDescription: "Interval between health checks in seconds.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"chk_timeout": schema.Int64Attribute{
+				MarkdownDescription: "Health check timeout in seconds.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"chk_retry_count": schema.Int64Attribute{
+				MarkdownDescription: "Number of consecutive failed health checks before a real server is marked down.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"bandwidth": schema.Int64Attribute{
+				MarkdownDescription: "Bandwidth limit in Mbps. `0` means unlimited.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"conns_per_sec_limit": schema.Int64Attribute{
+				MarkdownDescription: "Maximum new connections per second. `0` means unlimited.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"requests_per_sec_limit": schema.Int64Attribute{
+				MarkdownDescription: "Maximum HTTP requests per second. `0` means unlimited.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"max_conns_limit": schema.Int64Attribute{
+				MarkdownDescription: "Maximum concurrent connections. `0` means unlimited.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -208,6 +288,54 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 		}
 	}
 
+	if !m.Schedule.IsNull() && !m.Schedule.IsUnknown() {
+		p.Schedule = m.Schedule.ValueString()
+	}
+	if !m.PersistTimeout.IsNull() && !m.PersistTimeout.IsUnknown() {
+		p.PersistTimeout = m.PersistTimeout.ValueString()
+	}
+	if !m.Idletime.IsNull() && !m.Idletime.IsUnknown() {
+		v := int32(m.Idletime.ValueInt64())
+		p.Idletime = &v
+	}
+	if !m.ForceL7.IsNull() && !m.ForceL7.IsUnknown() {
+		p.ForceL7 = boolPtr(m.ForceL7.ValueBool())
+	}
+	if !m.CheckType.IsNull() && !m.CheckType.IsUnknown() {
+		p.CheckType = m.CheckType.ValueString()
+	}
+	if !m.CheckPort.IsNull() && !m.CheckPort.IsUnknown() {
+		p.CheckPort = m.CheckPort.ValueString()
+	}
+	if !m.ChkInterval.IsNull() && !m.ChkInterval.IsUnknown() {
+		v := int32(m.ChkInterval.ValueInt64())
+		p.ChkInterval = &v
+	}
+	if !m.ChkTimeout.IsNull() && !m.ChkTimeout.IsUnknown() {
+		v := int32(m.ChkTimeout.ValueInt64())
+		p.ChkTimeout = &v
+	}
+	if !m.ChkRetryCount.IsNull() && !m.ChkRetryCount.IsUnknown() {
+		v := int32(m.ChkRetryCount.ValueInt64())
+		p.ChkRetryCount = &v
+	}
+	if !m.Bandwidth.IsNull() && !m.Bandwidth.IsUnknown() {
+		v := int32(m.Bandwidth.ValueInt64())
+		p.Bandwidth = &v
+	}
+	if !m.ConnsPerSecLimit.IsNull() && !m.ConnsPerSecLimit.IsUnknown() {
+		v := int32(m.ConnsPerSecLimit.ValueInt64())
+		p.ConnsPerSecLimit = &v
+	}
+	if !m.RequestsPerSecLimit.IsNull() && !m.RequestsPerSecLimit.IsUnknown() {
+		v := int32(m.RequestsPerSecLimit.ValueInt64())
+		p.RequestsPerSecLimit = &v
+	}
+	if !m.MaxConnsLimit.IsNull() && !m.MaxConnsLimit.IsUnknown() {
+		v := int32(m.MaxConnsLimit.ValueInt64())
+		p.MaxConnsLimit = &v
+	}
+
 	if !m.EspEnabled.IsNull() && !m.EspEnabled.IsUnknown() {
 		p.EspEnabled = boolPtr(m.EspEnabled.ValueBool())
 	}
@@ -274,6 +402,20 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	}
 	listVal, diags := types.ListValueFrom(ctx, types.StringType, certs)
 	m.CertFiles = listVal
+
+	m.Schedule = types.StringValue(vs.Schedule)
+	m.PersistTimeout = types.StringValue(vs.PersistTimeout)
+	m.Idletime = int64FromPtr(vs.Idletime)
+	m.ForceL7 = boolFromPtr(vs.ForceL7)
+	m.CheckType = types.StringValue(vs.CheckType)
+	m.CheckPort = types.StringValue(vs.CheckPort)
+	m.ChkInterval = int64FromPtr(vs.ChkInterval)
+	m.ChkTimeout = int64FromPtr(vs.ChkTimeout)
+	m.ChkRetryCount = int64FromPtr(vs.ChkRetryCount)
+	m.Bandwidth = int64FromPtr(vs.Bandwidth)
+	m.ConnsPerSecLimit = int64FromPtr(vs.ConnsPerSecLimit)
+	m.RequestsPerSecLimit = int64FromPtr(vs.RequestsPerSecLimit)
+	m.MaxConnsLimit = int64FromPtr(vs.MaxConnsLimit)
 
 	m.EspEnabled = boolFromPtr(vs.EspEnabled)
 	m.EspAllowedHosts = types.StringValue(vs.AllowedHosts)

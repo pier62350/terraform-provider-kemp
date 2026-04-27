@@ -19,6 +19,21 @@ type VirtualService struct {
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
 
+	// Standard options
+	Schedule            string `json:"Schedule,omitempty"`
+	PersistTimeout      string `json:"PersistTimeout,omitempty"`
+	Idletime            *int32 `json:"Idletime,omitempty"`
+	ForceL7             *bool  `json:"ForceL7,omitempty"`
+	CheckType           string `json:"CheckType,omitempty"`
+	CheckPort           string `json:"CheckPort,omitempty"`
+	ChkInterval         *int32 `json:"ChkInterval,omitempty"`
+	ChkTimeout          *int32 `json:"ChkTimeout,omitempty"`
+	ChkRetryCount       *int32 `json:"ChkRetryCount,omitempty"`
+	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
+	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
+	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`
+	MaxConnsLimit       *int32 `json:"MaxConnsLimit,omitempty"`
+
 	// ESP (Edge Security Pack)
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
 	AllowedHosts        string `json:"AllowedHosts,omitempty"`
@@ -43,6 +58,21 @@ type VirtualServiceParams struct {
 	Enable          *bool  `json:"Enable,omitempty"`
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
+
+	// Standard options
+	Schedule            string `json:"Schedule,omitempty"`
+	PersistTimeout      string `json:"PersistTimeout,omitempty"`
+	Idletime            *int32 `json:"Idletime,omitempty"`
+	ForceL7             *bool  `json:"ForceL7,omitempty"`
+	CheckType           string `json:"CheckType,omitempty"`
+	CheckPort           string `json:"CheckPort,omitempty"`
+	ChkInterval         *int32 `json:"ChkInterval,omitempty"`
+	ChkTimeout          *int32 `json:"ChkTimeout,omitempty"`
+	ChkRetryCount       *int32 `json:"ChkRetryCount,omitempty"`
+	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
+	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
+	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`
+	MaxConnsLimit       *int32 `json:"MaxConnsLimit,omitempty"`
 
 	// ESP (Edge Security Pack)
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`

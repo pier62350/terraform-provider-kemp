@@ -34,6 +34,8 @@ type ACMEAccountModel struct {
 	Email            types.String `tfsdk:"email"`
 	DirectoryURL     types.String `tfsdk:"directory_url"`
 	RenewPeriod      types.Int64  `tfsdk:"renew_period"`
+	KID              types.String `tfsdk:"kid"`
+	HMACKey          types.String `tfsdk:"hmac_key"`
 	AccountID        types.String `tfsdk:"account_id"`
 	AccountDirectory types.String `tfsdk:"account_directory"`
 }
@@ -70,6 +72,16 @@ Delete calls ` + "`delacmeconfig`" + ` which only succeeds if there are no ACME 
 				Optional:            true,
 				Computed:            true,
 				MarkdownDescription: "Days before expiry at which LoadMaster auto-renews issued certs (1-60).",
+			},
+			"kid": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "DigiCert Key ID (`setacmekid`). Only valid when `acme_type = \"2\"`. Write-only — LoadMaster does not return this value on read.",
+			},
+			"hmac_key": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "DigiCert HMAC key (`setacmehmac`). Only valid when `acme_type = \"2\"`. Write-only — LoadMaster does not return this value on read.",
 			},
 			"account_id":        schema.StringAttribute{Computed: true, MarkdownDescription: "Registered ACME account identifier."},
 			"account_directory": schema.StringAttribute{Computed: true, MarkdownDescription: "Effective ACME directory URL the account is registered against."},
@@ -124,6 +136,19 @@ func (r *ACMEAccountResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
+	if !data.KID.IsNull() && !data.KID.IsUnknown() && data.KID.ValueString() != "" {
+		if err := r.client.SetACMEKID(ctx, data.KID.ValueString()); err != nil {
+			resp.Diagnostics.AddError("Error setting DigiCert key ID", err.Error())
+			return
+		}
+	}
+	if !data.HMACKey.IsNull() && !data.HMACKey.IsUnknown() && data.HMACKey.ValueString() != "" {
+		if err := r.client.SetACMEHMAC(ctx, data.HMACKey.ValueString()); err != nil {
+			resp.Diagnostics.AddError("Error setting DigiCert HMAC", err.Error())
+			return
+		}
+	}
+
 	if err := r.client.RegisterACMEAccount(ctx, data.ACMEType.ValueString(), data.Email.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Error registering ACME account", err.Error())
 		return
@@ -174,6 +199,18 @@ func (r *ACMEAccountResource) Update(ctx context.Context, req resource.UpdateReq
 	if !data.RenewPeriod.IsNull() && !data.RenewPeriod.IsUnknown() {
 		if err := r.client.SetACMERenewPeriod(ctx, data.ACMEType.ValueString(), int32(data.RenewPeriod.ValueInt64())); err != nil {
 			resp.Diagnostics.AddError("Error updating ACME renew period", err.Error())
+			return
+		}
+	}
+	if !data.KID.IsNull() && !data.KID.IsUnknown() && data.KID.ValueString() != "" {
+		if err := r.client.SetACMEKID(ctx, data.KID.ValueString()); err != nil {
+			resp.Diagnostics.AddError("Error updating DigiCert key ID", err.Error())
+			return
+		}
+	}
+	if !data.HMACKey.IsNull() && !data.HMACKey.IsUnknown() && data.HMACKey.ValueString() != "" {
+		if err := r.client.SetACMEHMAC(ctx, data.HMACKey.ValueString()); err != nil {
+			resp.Diagnostics.AddError("Error updating DigiCert HMAC", err.Error())
 			return
 		}
 	}
