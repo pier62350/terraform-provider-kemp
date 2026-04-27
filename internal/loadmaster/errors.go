@@ -32,7 +32,7 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	switch apiErr.Message {
-	case "Unknown VS", "Unknown RS", "Unknown SubVS":
+	case "Unknown VS", "Unknown RS", "Unknown SubVS", "Unknown ACME cert":
 		return true
 	}
 	return false
