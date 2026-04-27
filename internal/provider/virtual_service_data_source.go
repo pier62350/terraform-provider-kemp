@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -34,13 +35,15 @@ func (d *VirtualServiceDataSource) Schema(_ context.Context, _ datasource.Schema
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Reads a Kemp LoadMaster virtual service by its `Index`.",
 		Attributes: map[string]schema.Attribute{
-			"id":       schema.StringAttribute{Required: true, MarkdownDescription: "LoadMaster `Index` of the virtual service."},
-			"address":  schema.StringAttribute{Computed: true},
-			"port":     schema.StringAttribute{Computed: true},
-			"protocol": schema.StringAttribute{Computed: true},
-			"type":     schema.StringAttribute{Computed: true},
-			"nickname": schema.StringAttribute{Computed: true},
-			"enabled":  schema.BoolAttribute{Computed: true},
+			"id":               schema.StringAttribute{Required: true, MarkdownDescription: "LoadMaster `Index` of the virtual service."},
+			"address":          schema.StringAttribute{Computed: true},
+			"port":             schema.StringAttribute{Computed: true},
+			"protocol":         schema.StringAttribute{Computed: true},
+			"type":             schema.StringAttribute{Computed: true},
+			"nickname":         schema.StringAttribute{Computed: true},
+			"enabled":          schema.BoolAttribute{Computed: true},
+			"ssl_acceleration": schema.BoolAttribute{Computed: true},
+			"cert_files":       schema.ListAttribute{Computed: true, ElementType: types.StringType},
 		},
 	}
 }
@@ -84,5 +87,20 @@ func (d *VirtualServiceDataSource) Read(ctx context.Context, req datasource.Read
 	} else {
 		data.Enabled = types.BoolValue(false)
 	}
+	if vs.SSLAcceleration != nil {
+		data.SSLAcceleration = types.BoolValue(*vs.SSLAcceleration)
+	} else {
+		data.SSLAcceleration = types.BoolValue(false)
+	}
+	var certs []string
+	if vs.CertFile != "" {
+		certs = strings.Split(vs.CertFile, ",")
+		for i := range certs {
+			certs[i] = strings.TrimSpace(certs[i])
+		}
+	}
+	listVal, listDiags := types.ListValueFrom(ctx, types.StringType, certs)
+	resp.Diagnostics.Append(listDiags...)
+	data.CertFiles = listVal
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

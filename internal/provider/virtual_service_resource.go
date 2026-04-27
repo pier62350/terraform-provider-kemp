@@ -7,7 +7,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -32,13 +34,15 @@ type VirtualServiceResource struct {
 }
 
 type VirtualServiceResourceModel struct {
-	Id       types.String `tfsdk:"id"`
-	Address  types.String `tfsdk:"address"`
-	Port     types.String `tfsdk:"port"`
-	Protocol types.String `tfsdk:"protocol"`
-	Type     types.String `tfsdk:"type"`
-	Nickname types.String `tfsdk:"nickname"`
-	Enabled  types.Bool   `tfsdk:"enabled"`
+	Id              types.String `tfsdk:"id"`
+	Address         types.String `tfsdk:"address"`
+	Port            types.String `tfsdk:"port"`
+	Protocol        types.String `tfsdk:"protocol"`
+	Type            types.String `tfsdk:"type"`
+	Nickname        types.String `tfsdk:"nickname"`
+	Enabled         types.Bool   `tfsdk:"enabled"`
+	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
+	CertFiles       types.List   `tfsdk:"cert_files"`
 }
 
 func (r *VirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -84,6 +88,17 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+			"ssl_acceleration": schema.BoolAttribute{
+				MarkdownDescription: "Enable SSL/TLS termination on the LoadMaster (a.k.a. SSL acceleration). Requires `cert_files` to be set.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"cert_files": schema.ListAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "Names of certificates (as stored on the LoadMaster) attached to this virtual service. Multiple entries enable SNI: LoadMaster picks the cert whose subject matches the client's TLS SNI hostname. Order matters — the first cert is the default.",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -103,7 +118,8 @@ func (r *VirtualServiceResource) Configure(_ context.Context, req resource.Confi
 	r.client = client
 }
 
-func (r *VirtualServiceResource) paramsFromModel(m VirtualServiceResourceModel) loadmaster.VirtualServiceParams {
+func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualServiceResourceModel) (loadmaster.VirtualServiceParams, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	p := loadmaster.VirtualServiceParams{
 		NickName: m.Nickname.ValueString(),
 		VSType:   m.Type.ValueString(),
@@ -111,10 +127,20 @@ func (r *VirtualServiceResource) paramsFromModel(m VirtualServiceResourceModel) 
 	if !m.Enabled.IsNull() && !m.Enabled.IsUnknown() {
 		p.Enable = boolPtr(m.Enabled.ValueBool())
 	}
-	return p
+	if !m.SSLAcceleration.IsNull() && !m.SSLAcceleration.IsUnknown() {
+		p.SSLAcceleration = boolPtr(m.SSLAcceleration.ValueBool())
+	}
+	if !m.CertFiles.IsNull() && !m.CertFiles.IsUnknown() {
+		var certs []string
+		diags.Append(m.CertFiles.ElementsAs(ctx, &certs, false)...)
+		if !diags.HasError() {
+			p.CertFile = strings.Join(certs, ",")
+		}
+	}
+	return p, diags
 }
 
-func (r *VirtualServiceResource) writeState(vs *loadmaster.VirtualService, m *VirtualServiceResourceModel) {
+func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.VirtualService, m *VirtualServiceResourceModel) diag.Diagnostics {
 	m.Id = types.StringValue(strconv.Itoa(int(vs.Index)))
 	m.Address = types.StringValue(vs.Address)
 	m.Port = types.StringValue(vs.Port)
@@ -126,6 +152,22 @@ func (r *VirtualServiceResource) writeState(vs *loadmaster.VirtualService, m *Vi
 	} else {
 		m.Enabled = types.BoolValue(false)
 	}
+	if vs.SSLAcceleration != nil {
+		m.SSLAcceleration = types.BoolValue(*vs.SSLAcceleration)
+	} else {
+		m.SSLAcceleration = types.BoolValue(false)
+	}
+
+	var certs []string
+	if vs.CertFile != "" {
+		certs = strings.Split(vs.CertFile, ",")
+		for i := range certs {
+			certs[i] = strings.TrimSpace(certs[i])
+		}
+	}
+	listVal, diags := types.ListValueFrom(ctx, types.StringType, certs)
+	m.CertFiles = listVal
+	return diags
 }
 
 func (r *VirtualServiceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -135,14 +177,20 @@ func (r *VirtualServiceResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	vs, err := r.client.AddVirtualService(ctx, data.Address.ValueString(), data.Port.ValueString(), data.Protocol.ValueString(), r.paramsFromModel(data))
+	params, d := r.paramsFromModel(ctx, data)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	vs, err := r.client.AddVirtualService(ctx, data.Address.ValueString(), data.Port.ValueString(), data.Protocol.ValueString(), params)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating virtual service", err.Error())
 		return
 	}
 	tflog.Trace(ctx, "created virtual service", map[string]any{"index": vs.Index})
 
-	r.writeState(vs, &data)
+	resp.Diagnostics.Append(r.writeState(ctx, vs, &data)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -163,7 +211,7 @@ func (r *VirtualServiceResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	r.writeState(vs, &data)
+	resp.Diagnostics.Append(r.writeState(ctx, vs, &data)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -174,13 +222,19 @@ func (r *VirtualServiceResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	vs, err := r.client.ModifyVirtualService(ctx, data.Id.ValueString(), r.paramsFromModel(data))
+	params, d := r.paramsFromModel(ctx, data)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	vs, err := r.client.ModifyVirtualService(ctx, data.Id.ValueString(), params)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating virtual service", err.Error())
 		return
 	}
 
-	r.writeState(vs, &data)
+	resp.Diagnostics.Append(r.writeState(ctx, vs, &data)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -204,6 +258,6 @@ func (r *VirtualServiceResource) ImportState(ctx context.Context, req resource.I
 	}
 
 	var data VirtualServiceResourceModel
-	r.writeState(vs, &data)
+	resp.Diagnostics.Append(r.writeState(ctx, vs, &data)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

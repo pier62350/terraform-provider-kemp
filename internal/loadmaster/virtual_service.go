@@ -9,21 +9,25 @@ import "context"
 // addvs/showvs/modvs commands. Field names match the LoadMaster JSON
 // (PascalCase) via explicit json tags.
 type VirtualService struct {
-	Index    int32  `json:"Index"`
-	Address  string `json:"VSAddress"`
-	Port     string `json:"VSPort"`
-	Protocol string `json:"Protocol"`
-	VSType   string `json:"VStype"`
-	NickName string `json:"NickName"`
-	Enable   *bool  `json:"Enable,omitempty"`
+	Index           int32  `json:"Index"`
+	Address         string `json:"VSAddress"`
+	Port            string `json:"VSPort"`
+	Protocol        string `json:"Protocol"`
+	VSType          string `json:"VStype"`
+	NickName        string `json:"NickName"`
+	Enable          *bool  `json:"Enable,omitempty"`
+	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
+	CertFile        string `json:"CertFile,omitempty"`
 }
 
 // VirtualServiceParams are the optional knobs for create/modify.
 // Only fields that are non-nil / non-empty get sent to LoadMaster.
 type VirtualServiceParams struct {
-	NickName string `json:"NickName,omitempty"`
-	VSType   string `json:"VStype,omitempty"`
-	Enable   *bool  `json:"Enable,omitempty"`
+	NickName        string `json:"NickName,omitempty"`
+	VSType          string `json:"VStype,omitempty"`
+	Enable          *bool  `json:"Enable,omitempty"`
+	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
+	CertFile        string `json:"CertFile,omitempty"`
 }
 
 type vsResponse struct {
