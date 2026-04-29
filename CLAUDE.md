@@ -161,12 +161,10 @@ Examples in this repo use `10.0.x.x` for that reason.
 
 ## Roadmap (loose, in priority order)
 
-- Live acceptance/smoke tests for `kemp_sub_virtual_service` and
-  `kemp_sub_virtual_service_rule` (no TF_ACC coverage yet)
-- `kemp_sub_virtual_service_rule` data source — read back rule attachments
-  on a SubVS (the resource exists, the data source does not)
-- `persist` mode field — the `persist` API key (values: `src`, `cookie`,
-  `ssl`, `sip`, `super`, etc.) is not returned by `showvs`; needs a live
-  investigation before implementing to confirm round-trip behaviour
-- Remaining VS/SubVS fields from `showvs`: `MultiConnect`, `PassSni`,
-  `PassCipher`, `ServerInit`, `Verify`, `ClientCert` (low priority)
+- **Run live acceptance tests** — Tests exist for VS, SubVS, SubVS rule,
+  and real server in `internal/provider/*_test.go`. Run against a dedicated
+  lab unit (not 192.168.1.55 / 192.168.1.251) with VS addresses in the
+  10.0.0.100–10.0.0.103 range:
+  ```
+  TF_ACC=1 KEMP_HOST=https://192.168.1.155 KEMP_API_KEY=... make testacc
+  ```
