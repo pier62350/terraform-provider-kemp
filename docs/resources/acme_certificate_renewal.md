@@ -46,4 +46,4 @@ resource "kemp_acme_certificate_renewal" "force" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Computed. Set to `cert_name` on create; used as the Terraform resource ID.

@@ -58,52 +58,59 @@ resource "kemp_sub_virtual_service" "static" {
 
 ### Optional
 
-- `add_via` (String) Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`.
-- `allow_http2` (Boolean) Enable HTTP/2 support on this SubVS.
-- `bandwidth` (Number) Bandwidth limit in Mbps. `0` means unlimited.
-- `cache` (Boolean) Enable HTTP response caching on the LoadMaster for this SubVS.
-- `cert_files` (List of String) Names of certificates attached to this SubVS (multiple entries enable SNI).
-- `check_port` (String) Port used for health checks. `0` means use the VS port.
-- `check_type` (String) Health check type: `tcp`, `http`, `https`, `icmp`, `none`, etc.
-- `check_use_get` (String) HTTP method for health checks: `head` (default) or `get`.
-- `check_use_http11` (Boolean) Use HTTP/1.1 for HTTP-based health checks.
-- `chk_interval` (Number) Interval between health checks in seconds.
-- `chk_retry_count` (Number) Consecutive failures before marking a real server down.
-- `chk_timeout` (Number) Health check timeout in seconds.
-- `compress` (Boolean) Enable HTTP response compression (gzip) for this SubVS.
-- `conns_per_sec_limit` (Number) Maximum new connections per second. `0` means unlimited.
-- `enabled` (Boolean)
-- `enhanced_health_checks` (Boolean) Enable enhanced health checks.
-- `esp_allowed_directories` (String)
-- `esp_allowed_hosts` (String)
-- `esp_display_pub_priv` (Boolean)
-- `esp_enabled` (Boolean) Enable Edge Security Pack on this SubVS.
-- `esp_include_nested_groups` (Boolean)
-- `esp_input_auth_mode` (String) Client-side auth mode: `none`, `basic`, `form`.
-- `esp_logs` (Boolean)
-- `esp_output_auth_mode` (String) Server-side auth mode: `none`, `basic`, `form`, `kcd`.
-- `force_l4` (Boolean) Force Layer-4 processing (bypass Layer-7 inspection).
-- `force_l7` (Boolean) Force Layer-7 processing.
-- `idletime` (Number) Idle connection timeout in seconds.
-- `match_len` (Number) Bytes of health check response body to inspect for match pattern.
-- `max_conns_limit` (Number) Maximum concurrent connections. `0` means unlimited.
-- `need_host_name` (Boolean) Send the VS hostname in the HTTP `Host` header during health checks.
-- `nickname` (String) Friendly name shown in the WUI.
-- `persist_timeout` (String) Persistence timeout in seconds. `0` disables persistence.
-- `refresh_persist` (Boolean) Refresh the persistence entry on every request (not just the first).
-- `requests_per_sec_limit` (Number) Maximum HTTP requests per second. `0` means unlimited.
-- `rs_minimum` (Number) Minimum number of active real servers required before the SubVS is marked up. `0` means no minimum.
-- `schedule` (String) Load-balancing algorithm: `rr`, `wlc`, `lc`, `pi`, `ph`, etc.
-- `ssl_acceleration` (Boolean) Enable SSL/TLS termination on this SubVS.
-- `ssl_reencrypt` (Boolean) Re-encrypt to real servers using the same SSL session parameters as the client.
-- `ssl_reverse` (Boolean) Re-encrypt connections to real servers using SSL.
-- `transparent` (Boolean) Transparent mode — preserves the client IP address when forwarding to real servers.
-- `type` (String) VS type — `gen`, `http`, `http2`, `ts`, `tls`, `log`.
-- `use_for_snat` (Boolean) Use this SubVS as the source NAT address for outbound connections.
-- `waf_alert_threshold` (Number)
-- `waf_blocking_paranoia` (Number)
-- `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy`, or `owasp`.
-- `waf_ip_reputation_blocking` (Boolean) Enable IP Reputation Blocking on this SubVS.
+- `add_via` (String) Optional. Whether to add a `Via` header to proxied requests: `no` (default), `add`, or `replace`.
+- `allow_http2` (Boolean) Optional. Enable HTTP/2 support on this SubVS. Default: `false`.
+- `bandwidth` (Number) Optional. Bandwidth limit in Mbps. Default: `0` (unlimited).
+- `cache` (Boolean) Optional. Enable HTTP response caching on the LoadMaster for this SubVS. Default: `false`.
+- `cert_files` (List of String) Optional. Names of certificates attached to this SubVS (multiple entries enable SNI — LoadMaster picks by client SNI; first entry is the fallback). Default: empty.
+- `check_port` (String) Optional. Port used for health checks. Default: `0` (use the SubVS listening port).
+- `check_type` (String) Optional. Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `none`, etc. Default: `tcp`.
+- `check_use_get` (String) Optional. HTTP method for health checks: `head` (default) or `get`.
+- `check_use_http11` (Boolean) Optional. Use HTTP/1.1 for HTTP-based health checks. Default: `false`.
+- `chk_interval` (Number) Optional. Interval between health checks in seconds. Default: `0` (uses the global interval).
+- `chk_retry_count` (Number) Optional. Consecutive failed checks before marking a real server down. Default: `0` (uses the global retry count).
+- `chk_timeout` (Number) Optional. Health check timeout in seconds. Default: `0` (uses the global timeout).
+- `client_cert` (Number) Optional. Client certificate forwarding: `0` = do not forward (default), `1` = forward if present, `2` = always require and forward.
+- `compress` (Boolean) Optional. Enable HTTP response compression (gzip) for this SubVS. Default: `false`.
+- `conns_per_sec_limit` (Number) Optional. Maximum new connections per second. Default: `0` (unlimited).
+- `enabled` (Boolean) Optional. Whether the SubVS is enabled. Default: `true`.
+- `enhanced_health_checks` (Boolean) Optional. Enable enhanced health checks (sends a more complete HTTP request including headers). Default: `false`.
+- `esp_allowed_directories` (String) Optional. Newline-separated list of URI prefixes allowed through ESP. Empty string allows all paths.
+- `esp_allowed_hosts` (String) Optional. Newline-separated list of hostnames the SubVS will accept for ESP. Empty string matches all hosts.
+- `esp_display_pub_priv` (Boolean) Optional. Display the public/private session toggle on the ESP login form. Default: `false`.
+- `esp_enabled` (Boolean) Optional. Enable Kemp Edge Security Pack (ESP) on this SubVS. Default: `false`.
+- `esp_include_nested_groups` (Boolean) Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`.
+- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.
+- `esp_logs` (Boolean) Optional. Enable extended ESP logging for this SubVS. Default: `false`.
+- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).
+- `force_l4` (Boolean) Optional. Force Layer-4 processing (bypass Layer-7 inspection). Default: `false`.
+- `force_l7` (Boolean) Optional. Force Layer-7 processing. Default: `true` for `http`/`http2` types.
+- `idletime` (Number) Optional. Idle connection timeout in seconds. Default: `660`.
+- `match_len` (Number) Optional. Bytes of the health check response body to inspect for a match pattern. Default: `0` (disabled).
+- `max_conns_limit` (Number) Optional. Maximum concurrent connections. Default: `0` (unlimited).
+- `multi_connect` (Boolean) Optional. Allow multiple simultaneous connections from the same client. Default: `false`.
+- `need_host_name` (Boolean) Optional. Send the VS hostname in the HTTP `Host` header during health checks. Default: `false`.
+- `nickname` (String) Optional. Friendly name for the SubVS shown in the WUI.
+- `pass_cipher` (Boolean) Optional. Pass the negotiated cipher suite to real servers. Default: `false`.
+- `pass_sni` (Boolean) Optional. Pass the TLS SNI hostname to real servers. Default: `false`.
+- `persist` (String) Optional. Persistence mode: `src` (source IP), `cookie`, `active-cookie`, `active-cookie-insert`, `ssl`, `sip`, `rdp`, `super`, `none`. Default: `none`. **Note:** LoadMaster does not return this field on read — stored in state as-set.
+- `persist_timeout` (String) Optional. Persistence timeout in seconds. Default: `0` (persistence disabled).
+- `refresh_persist` (Boolean) Optional. Refresh the persistence entry on every request, not just the first. Default: `false`.
+- `requests_per_sec_limit` (Number) Optional. Maximum HTTP requests per second. Default: `0` (unlimited).
+- `rs_minimum` (Number) Optional. Minimum number of active real servers required before the SubVS is marked up. Default: `0` (no minimum).
+- `schedule` (String) Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`.
+- `server_init` (Number) Optional. Server-side connection initialisation timeout in seconds. Default: `0` (uses global setting).
+- `ssl_acceleration` (Boolean) Optional. Enable SSL/TLS termination on this SubVS. Requires `cert_files` to be set. Default: `false`.
+- `ssl_reencrypt` (Boolean) Optional. Re-encrypt to real servers using the same SSL session parameters as the client. Default: `false`.
+- `ssl_reverse` (Boolean) Optional. Re-encrypt connections to real servers using SSL. Default: `false`.
+- `transparent` (Boolean) Optional. Transparent mode — preserves the client IP address when forwarding to real servers. Default: `false`.
+- `type` (String) Optional. VS type — `gen`, `http`, `http2`, `ts`, `tls`, `log`. Default: `gen`.
+- `use_for_snat` (Boolean) Optional. Use this SubVS as the source NAT address for outbound connections. Default: `false`.
+- `verify` (Number) Optional. Client certificate verification level: `0` = off (default), `1` = optional, `2` = mandatory, `3` = skip CA check.
+- `waf_alert_threshold` (Number) Optional. Anomaly score threshold that triggers blocking. Default: `0` (detection-only / audit mode).
+- `waf_blocking_paranoia` (Number) Optional. OWASP paranoia level (`0`–`4`). Higher values activate more rules. Default: `0`.
+- `waf_intercept_mode` (String) Optional. WAF intercept mode: `disabled` (default), `legacy` (Legacy WAF), or `owasp` (OWASP/ModSecurity WAF).
+- `waf_ip_reputation_blocking` (Boolean) Optional. Block requests from IP addresses with a bad reputation using the WAF IP Reputation database. Default: `false`.
 
 ### Read-Only
 

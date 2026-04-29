@@ -24,5 +24,5 @@ resource "kemp_owasp_custom_data" "blocked_user_agents" {
 
 ### Required
 
-- `data` (String, Sensitive) Base64-encoded data file content.
-- `filename` (String) Filename including extension (e.g. `owasp_cust.data`).
+- `data` (String, Sensitive) **Required.** Base64-encoded data file content. Use `base64encode(file("path/to/file"))`. Forces replacement if changed.
+- `filename` (String) **Required.** Filename including extension (e.g. `owasp_cust.data`). Forces replacement if changed.

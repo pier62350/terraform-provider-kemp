@@ -28,62 +28,69 @@ resource "kemp_virtual_service" "example" {
 
 ### Required
 
-- `address` (String) IP address of an interface attached to the LoadMaster.
-- `port` (String) Listening port of the virtual service.
-- `protocol` (String) Layer-4 protocol: `tcp` or `udp`.
+- `address` (String) **Required.** IP address of an interface attached to the LoadMaster. Forces replacement if changed.
+- `port` (String) **Required.** Listening port of the virtual service. Forces replacement if changed.
+- `protocol` (String) **Required.** Layer-4 protocol: `tcp` or `udp`. Forces replacement if changed.
 
 ### Optional
 
-- `add_via` (String) Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`.
-- `allow_http2` (Boolean) Enable HTTP/2 support on this VS.
-- `bandwidth` (Number) Bandwidth limit in Mbps. `0` means unlimited.
-- `cache` (Boolean) Enable HTTP response caching on the LoadMaster for this VS.
-- `cert_files` (List of String) Names of certificates (as stored on the LoadMaster) attached to this virtual service. Multiple entries enable SNI: LoadMaster picks the cert whose subject matches the client's TLS SNI hostname. Order matters — the first cert is the default.
-- `check_port` (String) Port used for health checks. `0` means use the VS port.
-- `check_type` (String) Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `pop3`, `imap`, `rdp`, `snmp`, `ldap`, `none`, etc.
-- `check_use_get` (String) HTTP method used for health checks: `head` (default) or `get`.
-- `check_use_http11` (Boolean) Use HTTP/1.1 for HTTP-based health checks (instead of HTTP/1.0).
-- `chk_interval` (Number) Interval between health checks in seconds.
-- `chk_retry_count` (Number) Number of consecutive failed health checks before a real server is marked down.
-- `chk_timeout` (Number) Health check timeout in seconds.
-- `compress` (Boolean) Enable HTTP response compression (gzip) for this VS.
-- `conns_per_sec_limit` (Number) Maximum new connections per second. `0` means unlimited.
-- `enabled` (Boolean) Whether the virtual service is enabled.
-- `enhanced_health_checks` (Boolean) Enable enhanced health checks (sends a more complete HTTP request).
-- `esp_allowed_directories` (String) Newline-separated list of allowed URI prefixes when ESP is on.
-- `esp_allowed_hosts` (String) Newline-separated list of hostnames the VS will accept for ESP. Empty matches all.
-- `esp_display_pub_priv` (Boolean) Display the public/private toggle on the ESP login form.
-- `esp_enabled` (Boolean) Enable Kemp Edge Security Pack (ESP) on this VS — pre-auth, SSO, header injection, etc. Requires `type = http` and typically `ssl_acceleration = true`.
-- `esp_include_nested_groups` (Boolean) When ESP authorizes against AD groups, follow nested-group memberships.
-- `esp_input_auth_mode` (String) Client-side authentication mode. Known values: `none`, `basic`, `form`. Other numeric values from LoadMaster docs are also accepted.
-- `esp_logs` (Boolean) Enable extended ESP logging for this VS.
-- `esp_output_auth_mode` (String) Server-side authentication mode for the upstream. Known values: `none`, `basic`, `form`, `kcd` (Kerberos Constrained Delegation). Other numeric values from LoadMaster docs are also accepted.
-- `force_l4` (Boolean) Force Layer-4 processing (bypass Layer-7 inspection).
-- `force_l7` (Boolean) Force Layer-7 processing even when the VS is configured as Layer-4.
-- `idletime` (Number) Idle connection timeout in seconds. Default is 660.
-- `match_len` (Number) Number of bytes of the health check response body to inspect for the match pattern.
-- `max_conns_limit` (Number) Maximum concurrent connections. `0` means unlimited.
-- `need_host_name` (Boolean) Send the VS hostname in the HTTP `Host` header during health checks.
-- `nickname` (String) Friendly name for the virtual service.
-- `persist_timeout` (String) Persistence timeout in seconds. `0` disables persistence.
-- `refresh_persist` (Boolean) Refresh the persistence entry on every request (not just the first).
-- `requests_per_sec_limit` (Number) Maximum HTTP requests per second. `0` means unlimited.
-- `rs_minimum` (Number) Minimum number of active real servers required before the VS is marked up. `0` means no minimum.
-- `schedule` (String) Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc.
-- `ssl_acceleration` (Boolean) Enable SSL/TLS termination on the LoadMaster (a.k.a. SSL acceleration). Requires `cert_files` to be set.
-- `ssl_reencrypt` (Boolean) Re-encrypt to real servers using the same SSL session parameters as the client.
-- `ssl_reverse` (Boolean) Re-encrypt connections to real servers using SSL (SSL offload in reverse).
-- `transparent` (Boolean) Transparent mode — preserves the client IP address when forwarding to real servers.
-- `type` (String) VS type — one of `gen`, `http`, `http2`, `ts`, `tls`, `log`.
-- `use_for_snat` (Boolean) Use this VS as the source NAT address for outbound connections.
-- `waf_alert_threshold` (Number) Anomaly score that triggers blocking. Set to 0 for detection-only (audit) mode.
-- `waf_blocking_paranoia` (Number) OWASP paranoia level (0-4). Higher = more rules trigger, more false positives.
-- `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy` (Legacy WAF), or `owasp` (OWASP WAF).
-- `waf_ip_reputation_blocking` (Boolean) Enable IP Reputation Blocking. When enabled, requests from IP addresses with a bad reputation are blocked by the WAF.
+- `add_via` (String) Optional. Whether to add a `Via` header to proxied requests: `no` (default), `add`, or `replace`.
+- `allow_http2` (Boolean) Optional. Enable HTTP/2 support on this VS. Requires `type = http` and `ssl_acceleration = true`. Default: `false`.
+- `bandwidth` (Number) Optional. Bandwidth limit in Mbps. Default: `0` (unlimited).
+- `cache` (Boolean) Optional. Enable HTTP response caching on the LoadMaster for this VS. Default: `false`.
+- `cert_files` (List of String) Optional. Names of certificates (as stored on the LoadMaster) attached to this VS. Multiple entries enable SNI — LoadMaster picks the cert whose subject matches the client SNI hostname; first entry is the fallback default.
+- `check_port` (String) Optional. Port used for health checks. Default: `0` (use the VS listening port).
+- `check_type` (String) Optional. Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `pop3`, `imap`, `rdp`, `snmp`, `ldap`, `none`, etc. Default: `tcp`.
+- `check_use_get` (String) Optional. HTTP method for health checks: `head` (default) or `get`.
+- `check_use_http11` (Boolean) Optional. Use HTTP/1.1 for HTTP-based health checks (instead of HTTP/1.0). Default: `false`.
+- `chk_interval` (Number) Optional. Interval between health checks in seconds. Default: `0` (uses the global health-check interval).
+- `chk_retry_count` (Number) Optional. Consecutive failed health checks before a real server is marked down. Default: `0` (uses the global retry count).
+- `chk_timeout` (Number) Optional. Health check timeout in seconds. Default: `0` (uses the global timeout).
+- `client_cert` (Number) Optional. Client certificate forwarding: `0` = do not forward (default), `1` = forward if present, `2` = always require and forward.
+- `compress` (Boolean) Optional. Enable HTTP response compression (gzip) for this VS. Default: `false`.
+- `conns_per_sec_limit` (Number) Optional. Maximum new connections per second. Default: `0` (unlimited).
+- `enabled` (Boolean) Optional. Whether the virtual service is enabled. Default: `true`.
+- `enhanced_health_checks` (Boolean) Optional. Enable enhanced health checks (sends a more complete HTTP request including headers). Default: `false`.
+- `esp_allowed_directories` (String) Optional. Newline-separated list of URI prefixes allowed through ESP. Empty string allows all paths.
+- `esp_allowed_hosts` (String) Optional. Newline-separated list of hostnames the VS will accept for ESP. Empty string matches all hosts.
+- `esp_display_pub_priv` (Boolean) Optional. Display the public/private session toggle on the ESP login form. Default: `false`.
+- `esp_enabled` (Boolean) Optional. Enable Kemp Edge Security Pack (ESP) on this VS — pre-auth, SSO, header injection, etc. Requires `type = http` and typically `ssl_acceleration = true`. Default: `false`.
+- `esp_include_nested_groups` (Boolean) Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`.
+- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.
+- `esp_logs` (Boolean) Optional. Enable extended ESP logging for this VS. Default: `false`.
+- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).
+- `force_l4` (Boolean) Optional. Force Layer-4 processing, bypassing Layer-7 inspection. Default: `false`.
+- `force_l7` (Boolean) Optional. Force Layer-7 processing even when the VS is configured as Layer-4. Default: `true` for `http`/`http2` types.
+- `idletime` (Number) Optional. Idle connection timeout in seconds. Default: `660`.
+- `match_len` (Number) Optional. Bytes of the health check response body to inspect for a match pattern. Default: `0` (disabled).
+- `max_conns_limit` (Number) Optional. Maximum concurrent connections. Default: `0` (unlimited).
+- `multi_connect` (Boolean) Optional. Allow multiple simultaneous connections from the same client. Default: `false`.
+- `need_host_name` (Boolean) Optional. Send the VS hostname in the HTTP `Host` header during health checks. Default: `false`.
+- `nickname` (String) Optional. Friendly name for the virtual service shown in the WUI.
+- `pass_cipher` (Boolean) Optional. Pass the negotiated cipher suite to real servers. Default: `false`.
+- `pass_sni` (Boolean) Optional. Pass the TLS SNI hostname from the client to real servers. Default: `false`.
+- `persist` (String) Optional. Persistence mode: `src` (source IP), `cookie`, `active-cookie`, `active-cookie-insert`, `ssl`, `sip`, `rdp`, `super`, `none`. Default: `none`. **Note:** LoadMaster does not return this field on read — it is stored in state as-set and not reconciled on refresh.
+- `persist_timeout` (String) Optional. Persistence timeout in seconds. Default: `0` (persistence disabled).
+- `refresh_persist` (Boolean) Optional. Refresh the persistence entry on every request, not just the first. Default: `false`.
+- `requests_per_sec_limit` (Number) Optional. Maximum HTTP requests per second. Default: `0` (unlimited).
+- `rs_minimum` (Number) Optional. Minimum number of active real servers required before the VS is marked up. Default: `0` (no minimum).
+- `schedule` (String) Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`.
+- `server_init` (Number) Optional. Server-side connection initialisation timeout in seconds. Default: `0` (uses global setting).
+- `ssl_acceleration` (Boolean) Optional. Enable SSL/TLS termination on the LoadMaster. Requires `cert_files` to be set. Default: `false`.
+- `ssl_reencrypt` (Boolean) Optional. Re-encrypt to real servers using the same SSL session parameters as the client connection. Default: `false`.
+- `ssl_reverse` (Boolean) Optional. Re-encrypt connections to real servers using SSL (SSL offload in reverse — LoadMaster decrypts then re-encrypts). Default: `false`.
+- `transparent` (Boolean) Optional. Transparent mode — preserves the original client IP when forwarding to real servers. Default: `false`.
+- `type` (String) Optional. VS type — one of `gen`, `http`, `http2`, `ts`, `tls`, `log`. Default: `gen`.
+- `use_for_snat` (Boolean) Optional. Use this VS as the source NAT address for outbound connections. Default: `false`.
+- `verify` (Number) Optional. Client certificate verification level: `0` = off (default), `1` = request (optional), `2` = require, `3` = require and skip CA check.
+- `waf_alert_threshold` (Number) Optional. Anomaly score threshold that triggers blocking. Default: `0` (detection-only / audit mode).
+- `waf_blocking_paranoia` (Number) Optional. OWASP paranoia level (`0`–`4`). Higher values activate more rules and reduce false negatives at the cost of more false positives. Default: `0`.
+- `waf_intercept_mode` (String) Optional. WAF intercept mode: `disabled` (default), `legacy` (Legacy WAF), or `owasp` (OWASP/ModSecurity WAF). Note: switching between `legacy` and `owasp` requires disabling WAF first.
+- `waf_ip_reputation_blocking` (Boolean) Optional. Block requests from IP addresses with a bad reputation using the WAF IP Reputation database. Default: `false`.
 
 ### Read-Only
 
-- `id` (String) LoadMaster `Index` of the virtual service.
+- `id` (String) LoadMaster `Index` of the virtual service. Computed — assigned by LoadMaster on create.
 
 ## Import
 

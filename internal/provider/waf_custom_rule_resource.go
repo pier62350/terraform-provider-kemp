@@ -43,13 +43,13 @@ func (r *WafCustomRuleResource) Schema(_ context.Context, _ resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"filename": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Filename — single rule file (e.g. `modsecurity_crs_11_brute_force`) or a tar.gz ruleset bundle.",
+				MarkdownDescription: "**Required.** Filename — single rule file (e.g. `modsecurity_crs_11_brute_force`) or a tar.gz ruleset bundle. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"data": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Base64-encoded file content.",
+				MarkdownDescription: "**Required.** Base64-encoded file content. Use `base64encode(file(\"path/to/file\"))`. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},

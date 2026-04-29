@@ -41,20 +41,20 @@ resource "kemp_acme_account" "digicert" {
 
 ### Required
 
-- `acme_type` (String) ACME provider: `letsencrypt` or `digicert`.
+- `acme_type` (String) **Required.** ACME provider: `letsencrypt` or `digicert`. Forces replacement if changed.
 
 ### Optional
 
-- `directory_url` (String) ACME directory endpoint URL. Set to `https://acme-staging-v02.api.letsencrypt.org/directory` for Let's Encrypt staging, omit for the LoadMaster's default.
-- `email` (String) Account registration email (Let's Encrypt). Cannot be changed after registration without delete+recreate.
-- `hmac_key` (String, Sensitive) DigiCert HMAC key (`setacmehmac`). Only valid when `acme_type = "2"`. Write-only — LoadMaster does not return this value on read.
-- `kid` (String, Sensitive) DigiCert Key ID (`setacmekid`). Only valid when `acme_type = "2"`. Write-only — LoadMaster does not return this value on read.
-- `renew_period` (Number) Days before expiry at which LoadMaster auto-renews issued certs (1-60).
+- `directory_url` (String) Optional. ACME directory endpoint URL. Set to `https://acme-staging-v02.api.letsencrypt.org/directory` for Let's Encrypt staging; omit to use the LoadMaster default. Default: empty (LoadMaster default).
+- `email` (String) Optional. Account registration email (Let's Encrypt). Cannot be changed after registration without delete+recreate. Forces replacement if changed.
+- `hmac_key` (String, Sensitive) Optional. DigiCert HMAC key (`setacmehmac`). Only valid when `acme_type = "digicert"`. Write-only — LoadMaster does not return this value on read.
+- `kid` (String, Sensitive) Optional. DigiCert Key ID (`setacmekid`). Only valid when `acme_type = "digicert"`. Write-only — LoadMaster does not return this value on read.
+- `renew_period` (Number) Optional. Days before expiry at which LoadMaster auto-renews issued certs. Valid range: 1–60. Default: `30`.
 
 ### Read-Only
 
-- `account_directory` (String) Effective ACME directory URL the account is registered against.
-- `account_id` (String) Registered ACME account identifier.
+- `account_directory` (String) Computed. Effective ACME directory URL the account is registered against.
+- `account_id` (String) Computed. Registered ACME account identifier returned by the ACME server.
 
 ## Import
 

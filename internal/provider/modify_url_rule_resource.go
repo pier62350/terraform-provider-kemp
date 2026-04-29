@@ -44,11 +44,11 @@ func (r *ModifyURLRuleResource) Schema(_ context.Context, _ resource.SchemaReque
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "System-level URL rewrite rule. Attach via `kemp_virtual_service_rule`.",
 		Attributes: map[string]schema.Attribute{
-			"name":            schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"pattern":         schema.StringAttribute{Required: true, MarkdownDescription: "URL pattern to match."},
-			"replacement":     schema.StringAttribute{Required: true, MarkdownDescription: "Replacement URL/path."},
-			"only_on_flag":    schema.Int64Attribute{Optional: true},
-			"only_on_no_flag": schema.Int64Attribute{Optional: true},
+			"name":            schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Unique rule name. Forces replacement if changed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"pattern":         schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** URL pattern to match (regex)."},
+			"replacement":     schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Replacement URL or path."},
+			"only_on_flag":    schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is set."},
+			"only_on_no_flag": schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is NOT set."},
 		},
 	}
 }

@@ -25,11 +25,11 @@ resource "kemp_add_header_rule" "x_forwarded_proto" {
 
 ### Required
 
-- `header` (String) Header field name to add.
-- `name` (String) Unique rule name.
-- `replacement` (String) Header value to set (max 255 chars).
+- `header` (String) **Required.** Header field name to inject.
+- `name` (String) **Required.** Unique rule name. Forces replacement if changed.
+- `replacement` (String) **Required.** Header value to set (max 255 chars).
 
 ### Optional
 
-- `only_on_flag` (Number) Run only if this rule-chain flag (1-9) is set.
-- `only_on_no_flag` (Number) Run only if this rule-chain flag (1-9) is NOT set.
+- `only_on_flag` (Number) Optional. Run only if rule-chain flag (1–9) is set.
+- `only_on_no_flag` (Number) Optional. Run only if rule-chain flag (1–9) is NOT set.

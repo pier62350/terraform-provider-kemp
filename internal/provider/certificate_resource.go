@@ -44,24 +44,24 @@ func (r *CertificateResource) Schema(_ context.Context, _ resource.SchemaRequest
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Identifier (name) under which LoadMaster stores the certificate.",
+				MarkdownDescription: "**Required.** Identifier under which LoadMaster stores the certificate. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"data": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Base64-encoded PFX bundle or PEM text (cert + key concatenated). Use `base64encode(file(\"...pem\"))` in HCL.",
+				MarkdownDescription: "**Required.** Base64-encoded PFX bundle or PEM text (cert + key concatenated). Use `base64encode(file(\"path/to/cert.pem\"))` in HCL. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"password": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Password for encrypted PFX bundles. Leave empty for plain PEM.",
+				MarkdownDescription: "Optional. Password for encrypted PFX bundles. Omit or leave empty for plain PEM. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Cert type as reported by LoadMaster (e.g. `cert`, `pfx`).",
+				MarkdownDescription: "Computed. Certificate type as reported by LoadMaster (e.g. `cert`, `pfx`).",
 			},
 		},
 	}

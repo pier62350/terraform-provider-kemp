@@ -46,24 +46,24 @@ func (r *AddHeaderRuleResource) Schema(_ context.Context, _ resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Unique rule name.",
+				MarkdownDescription: "**Required.** Unique rule name. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"header": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Header field name to add.",
+				MarkdownDescription: "**Required.** Header field name to inject.",
 			},
 			"replacement": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Header value to set (max 255 chars).",
+				MarkdownDescription: "**Required.** Header value to set (max 255 chars).",
 			},
 			"only_on_flag": schema.Int64Attribute{
 				Optional:            true,
-				MarkdownDescription: "Run only if this rule-chain flag (1-9) is set.",
+				MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is set.",
 			},
 			"only_on_no_flag": schema.Int64Attribute{
 				Optional:            true,
-				MarkdownDescription: "Run only if this rule-chain flag (1-9) is NOT set.",
+				MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is NOT set.",
 			},
 		},
 	}

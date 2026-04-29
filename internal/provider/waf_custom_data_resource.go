@@ -42,13 +42,15 @@ func (r *WafCustomDataResource) Schema(_ context.Context, _ resource.SchemaReque
 		MarkdownDescription: "Uploads a custom data file for the legacy commercial WAF engine.",
 		Attributes: map[string]schema.Attribute{
 			"filename": schema.StringAttribute{
-				Required:      true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
+				MarkdownDescription: "**Required.** Filename of the WAF data file. Forces replacement if changed.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"data": schema.StringAttribute{
-				Required:      true,
-				Sensitive:     true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
+				Sensitive:           true,
+				MarkdownDescription: "**Required.** Base64-encoded data file content. Use `base64encode(file(\"path/to/file\"))`. Forces replacement if changed.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},
 	}

@@ -51,8 +51,9 @@ This is an action resource — Create fires the renewal; Read and Delete are no-
 Note: ` + "`renewacmecert`" + ` is asynchronous. LoadMaster accepts the request and returns immediately; the actual certificate refresh happens in the background.`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:      true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				Computed:            true,
+				MarkdownDescription: "Computed. Set to `cert_name` on create; used as the Terraform resource ID.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"cert_name": schema.StringAttribute{
 				Required:            true,

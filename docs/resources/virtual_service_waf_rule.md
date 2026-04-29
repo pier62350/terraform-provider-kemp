@@ -70,9 +70,9 @@ resource "kemp_virtual_service_waf_rule" "ip_reputation" {
 ### Required
 
 - `rule` (String) WAF rule path. May be empty if `disabled_rules` is set.
-- `virtual_service_address` (String)
-- `virtual_service_port` (String)
-- `virtual_service_protocol` (String)
+- `virtual_service_address` (String) **Required.** IP address of the parent virtual service. Forces replacement if changed.
+- `virtual_service_port` (String) **Required.** Port of the parent virtual service. Forces replacement if changed.
+- `virtual_service_protocol` (String) **Required.** Protocol of the parent virtual service (`tcp` or `udp`). Forces replacement if changed.
 
 ### Optional
 

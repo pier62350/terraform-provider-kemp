@@ -26,12 +26,12 @@ resource "kemp_replace_header_rule" "rewrite_host" {
 
 ### Required
 
-- `header` (String) Header field to operate on.
-- `name` (String)
-- `pattern` (String) Pattern within the header value to match.
-- `replacement` (String) Replacement string.
+- `header` (String) **Required.** Header field name to operate on.
+- `name` (String) **Required.** Unique rule name. Forces replacement if changed.
+- `pattern` (String) **Required.** Pattern within the header value to match.
+- `replacement` (String) **Required.** Replacement string.
 
 ### Optional
 
-- `only_on_flag` (Number)
-- `only_on_no_flag` (Number)
+- `only_on_flag` (Number) Optional. Run only if rule-chain flag (1–9) is set.
+- `only_on_no_flag` (Number) Optional. Run only if rule-chain flag (1–9) is NOT set.

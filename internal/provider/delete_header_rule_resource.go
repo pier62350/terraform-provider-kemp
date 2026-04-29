@@ -44,15 +44,16 @@ func (r *DeleteHeaderRuleResource) Schema(_ context.Context, _ resource.SchemaRe
 		MarkdownDescription: "System-level rule that strips request headers matching `pattern`. Attach to a virtual service via `kemp_virtual_service_rule`.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required:      true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
+				MarkdownDescription: "**Required.** Unique rule name. Forces replacement if changed.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"pattern": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Header-name pattern to delete (regex).",
+				MarkdownDescription: "**Required.** Header-name pattern (regex) to delete.",
 			},
-			"only_on_flag":    schema.Int64Attribute{Optional: true},
-			"only_on_no_flag": schema.Int64Attribute{Optional: true},
+			"only_on_flag":    schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is set."},
+			"only_on_no_flag": schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is NOT set."},
 		},
 	}
 }

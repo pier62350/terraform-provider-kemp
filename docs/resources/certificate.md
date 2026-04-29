@@ -34,16 +34,16 @@ resource "kemp_certificate" "example" {
 
 ### Required
 
-- `data` (String, Sensitive) Base64-encoded PFX bundle or PEM text (cert + key concatenated). Use `base64encode(file("...pem"))` in HCL.
-- `name` (String) Identifier (name) under which LoadMaster stores the certificate.
+- `data` (String, Sensitive) **Required.** Base64-encoded PFX bundle or PEM text (cert + key concatenated). Use `base64encode(file("path/to/cert.pem"))` in HCL. Forces replacement if changed.
+- `name` (String) **Required.** Identifier under which LoadMaster stores the certificate. Forces replacement if changed.
 
 ### Optional
 
-- `password` (String, Sensitive) Password for encrypted PFX bundles. Leave empty for plain PEM.
+- `password` (String, Sensitive) Optional. Password for encrypted PFX bundles. Omit or leave empty for plain PEM. Forces replacement if changed.
 
 ### Read-Only
 
-- `type` (String) Cert type as reported by LoadMaster (e.g. `cert`, `pfx`).
+- `type` (String) Computed. Certificate type as reported by LoadMaster (e.g. `cert`, `pfx`).
 
 ## Import
 

@@ -56,25 +56,25 @@ resource "kemp_acme_certificate" "example" {
 
 ### Required
 
-- `common_name` (String) Common Name (FQDN) on the certificate. Use a leading `*.` for a wildcard.
-- `name` (String) Identifier (name) under which LoadMaster stores the cert.
-- `virtual_service_id` (String) Index of the Virtual Service that LoadMaster will use to serve the HTTP-01 challenge. Ignored for DNS-01 (wildcard) issuance but still required by the API.
+- `common_name` (String) **Required.** Common Name (FQDN) on the certificate. Use a leading `*.` for a wildcard (DNS-01 challenge required). Forces replacement if changed.
+- `name` (String) **Required.** Identifier under which LoadMaster stores the certificate. Forces replacement if changed.
+- `virtual_service_id` (String) **Required.** Index of the virtual service LoadMaster uses to serve the HTTP-01 challenge. Unused for DNS-01 (wildcard) but still required by the API. Forces replacement if changed.
 
 ### Optional
 
-- `acme_type` (String) ACME provider: `letsencrypt` (default) or `digicert`.
-- `dns_api` (String) DNS provider for DNS-01 challenge (wildcard certs). Examples: `godaddy.com`, `cloudflare.com`. Required when `common_name` starts with `*.`.
-- `dns_api_params` (String, Sensitive) Provider-specific credentials for the DNS API (format depends on provider). Required when `dns_api` is set.
-- `email` (String) Registration email used by the ACME account.
-- `key_size` (Number) RSA key size in bits. LoadMaster default is 2048.
+- `acme_type` (String) Optional. ACME provider: `letsencrypt` (default) or `digicert`. Forces replacement if changed.
+- `dns_api` (String) Optional. DNS provider for DNS-01 challenge (required for wildcard certs). Examples: `godaddy.com`, `cloudflare.com`. Forces replacement if changed.
+- `dns_api_params` (String, Sensitive) Optional. Provider-specific credentials for the DNS API (format is provider-dependent). Required when `dns_api` is set. Forces replacement if changed.
+- `email` (String) Optional. Registration email used by the ACME account for this certificate. Forces replacement if changed.
+- `key_size` (Number) Optional. RSA key size in bits. Default: `2048`. Forces replacement if changed.
 
 ### Read-Only
 
-- `domain_name` (String) Domain name on the issued cert (as reported by LoadMaster).
-- `expiry_date` (String) Expiry timestamp (LoadMaster's free-form `Mon DD HH:MM:SS YYYY GMT` format).
-- `http_challenge_vs` (String) VS endpoint (IP:port) used for the HTTP-01 challenge.
-- `subject_alternate_names` (String) Comma-separated SANs as reported by LoadMaster.
-- `type` (String) Cert algorithm (`rsa`, `ecc`).
+- `domain_name` (String) Computed. Domain name on the issued certificate as reported by LoadMaster.
+- `expiry_date` (String) Computed. Expiry timestamp in LoadMaster's format (`Mon DD HH:MM:SS YYYY GMT`).
+- `http_challenge_vs` (String) Computed. VS endpoint (IP:port) used for the HTTP-01 challenge.
+- `subject_alternate_names` (String) Computed. Comma-separated Subject Alternative Names as reported by LoadMaster.
+- `type` (String) Computed. Certificate key algorithm (`rsa`, `ecc`).
 
 ## Import
 

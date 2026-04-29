@@ -46,14 +46,15 @@ func (r *ReplaceHeaderRuleResource) Schema(_ context.Context, _ resource.SchemaR
 		MarkdownDescription: "System-level rule that substitutes within a specific header value. Attach via `kemp_virtual_service_rule`.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required:      true,
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Required:            true,
+				MarkdownDescription: "**Required.** Unique rule name. Forces replacement if changed.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
-			"header":          schema.StringAttribute{Required: true, MarkdownDescription: "Header field to operate on."},
-			"pattern":         schema.StringAttribute{Required: true, MarkdownDescription: "Pattern within the header value to match."},
-			"replacement":     schema.StringAttribute{Required: true, MarkdownDescription: "Replacement string."},
-			"only_on_flag":    schema.Int64Attribute{Optional: true},
-			"only_on_no_flag": schema.Int64Attribute{Optional: true},
+			"header":          schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Header field name to operate on."},
+			"pattern":         schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Pattern within the header value to match."},
+			"replacement":     schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Replacement string."},
+			"only_on_flag":    schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is set."},
+			"only_on_no_flag": schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is NOT set."},
 		},
 	}
 }

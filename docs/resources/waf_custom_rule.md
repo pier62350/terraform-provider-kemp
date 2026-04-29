@@ -24,5 +24,5 @@ resource "kemp_waf_custom_rule" "brute_force" {
 
 ### Required
 
-- `data` (String, Sensitive) Base64-encoded file content.
-- `filename` (String) Filename — single rule file (e.g. `modsecurity_crs_11_brute_force`) or a tar.gz ruleset bundle.
+- `data` (String, Sensitive) **Required.** Base64-encoded file content. Use `base64encode(file("path/to/file"))`. Forces replacement if changed.
+- `filename` (String) **Required.** Filename — single rule file (e.g. `modsecurity_crs_11_brute_force`) or a tar.gz ruleset bundle. Forces replacement if changed.

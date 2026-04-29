@@ -44,11 +44,11 @@ func (r *ReplaceBodyRuleResource) Schema(_ context.Context, _ resource.SchemaReq
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "System-level rule that substitutes within response bodies. Attach via `kemp_virtual_service_rule` (responsebody direction).",
 		Attributes: map[string]schema.Attribute{
-			"name":            schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"pattern":         schema.StringAttribute{Required: true},
-			"replacement":     schema.StringAttribute{Required: true},
-			"only_on_flag":    schema.Int64Attribute{Optional: true},
-			"only_on_no_flag": schema.Int64Attribute{Optional: true},
+			"name":            schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Unique rule name. Forces replacement if changed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"pattern":         schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Pattern within the response body to match (regex)."},
+			"replacement":     schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Replacement string."},
+			"only_on_flag":    schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is set."},
+			"only_on_no_flag": schema.Int64Attribute{Optional: true, MarkdownDescription: "Optional. Run only if rule-chain flag (1–9) is NOT set."},
 		},
 	}
 }

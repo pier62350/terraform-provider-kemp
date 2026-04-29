@@ -26,18 +26,18 @@ resource "kemp_match_content_rule" "is_admin_path" {
 
 ### Required
 
-- `name` (String)
-- `pattern` (String) Pattern to match. Default match scope is the URL; set `header` or `body` to redirect.
+- `name` (String) **Required.** Unique rule name. Forces replacement if changed.
+- `pattern` (String) **Required.** Pattern to match against the URL (default scope) or the field set by `header`.
 
 ### Optional
 
-- `header` (String) Header field to match against. Use `body` to match the request body.
-- `ignore_case` (Boolean)
-- `include_host` (Boolean) Prepend the hostname to the request URI before matching.
-- `include_query` (Boolean) Append the query string to the URI before matching.
-- `match_type` (String) `regex` (default), `prefix`, or `postfix`.
-- `must_fail` (Boolean) If matched, abort the connection.
-- `negate` (Boolean) Invert the sense of the match.
-- `only_on_flag` (Number) Run only if chain flag (1-9) is set.
-- `only_on_no_flag` (Number) Run only if chain flag (1-9) is NOT set.
-- `set_on_match` (Number) Set chain flag (0-9) when matched.
+- `header` (String) Optional. Header field to match against instead of the URL. Use `body` to match the request body.
+- `ignore_case` (Boolean) Optional. Case-insensitive matching. Default: `false`.
+- `include_host` (Boolean) Optional. Prepend the hostname to the request URI before matching. Default: `false`.
+- `include_query` (Boolean) Optional. Append the query string to the URI before matching. Default: `false`.
+- `match_type` (String) Optional. Match algorithm: `regex` (default), `prefix`, or `postfix`.
+- `must_fail` (Boolean) Optional. If matched, abort the connection. Default: `false`.
+- `negate` (Boolean) Optional. Invert the sense of the match. Default: `false`.
+- `only_on_flag` (Number) Optional. Run only if rule-chain flag (1–9) is set.
+- `only_on_no_flag` (Number) Optional. Run only if rule-chain flag (1–9) is NOT set.
+- `set_on_match` (Number) Optional. Set rule-chain flag (0–9) when matched.

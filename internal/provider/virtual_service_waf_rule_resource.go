@@ -58,9 +58,9 @@ resource "kemp_virtual_service_waf_rule" "ipr" {
 
 The ` + "`rule`" + ` value is the LoadMaster rule path (e.g. ` + "`G/ip_reputation`" + `, ` + "`G/malware_detection`" + `). Multiple rules go in one call as a percent-space-separated list (` + "`G/a%20G/b`" + `). Set ` + "`rule`" + ` to empty and provide ` + "`disabled_rules`" + ` to surgically disable individual rule IDs.`,
 		Attributes: map[string]schema.Attribute{
-			"virtual_service_address":  schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"virtual_service_port":     schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"virtual_service_protocol": schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"virtual_service_address":  schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** IP address of the parent virtual service. Forces replacement if changed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"virtual_service_port":     schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Port of the parent virtual service. Forces replacement if changed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"virtual_service_protocol": schema.StringAttribute{Required: true, MarkdownDescription: "**Required.** Protocol of the parent virtual service (`tcp` or `udp`). Forces replacement if changed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"rule": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "WAF rule path. May be empty if `disabled_rules` is set.",

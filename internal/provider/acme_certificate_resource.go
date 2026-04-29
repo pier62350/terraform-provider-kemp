@@ -63,68 +63,68 @@ For wildcard certificates (CN starting with ` + "`*.`" + `), set ` + "`dns_api`"
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Identifier (name) under which LoadMaster stores the cert.",
+				MarkdownDescription: "**Required.** Identifier under which LoadMaster stores the certificate. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"common_name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Common Name (FQDN) on the certificate. Use a leading `*.` for a wildcard.",
+				MarkdownDescription: "**Required.** Common Name (FQDN) on the certificate. Use a leading `*.` for a wildcard (DNS-01 challenge required). Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"virtual_service_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Index of the Virtual Service that LoadMaster will use to serve the HTTP-01 challenge. Ignored for DNS-01 (wildcard) issuance but still required by the API.",
+				MarkdownDescription: "**Required.** Index of the virtual service LoadMaster uses to serve the HTTP-01 challenge. Unused for DNS-01 (wildcard) but still required by the API. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"acme_type": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "ACME provider: `letsencrypt` (default) or `digicert`.",
+				MarkdownDescription: "Optional. ACME provider: `letsencrypt` (default) or `digicert`. Forces replacement if changed.",
 				Default:             stringdefault.StaticString("letsencrypt"),
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"key_size": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "RSA key size in bits. LoadMaster default is 2048.",
+				MarkdownDescription: "Optional. RSA key size in bits. Default: `2048`. Forces replacement if changed.",
 				Default:             int64default.StaticInt64(2048),
 				PlanModifiers:       []planmodifier.Int64{int64RequiresReplace()},
 			},
 			"dns_api": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "DNS provider for DNS-01 challenge (wildcard certs). Examples: `godaddy.com`, `cloudflare.com`. Required when `common_name` starts with `*.`.",
+				MarkdownDescription: "Optional. DNS provider for DNS-01 challenge (required for wildcard certs). Examples: `godaddy.com`, `cloudflare.com`. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"dns_api_params": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Provider-specific credentials for the DNS API (format depends on provider). Required when `dns_api` is set.",
+				MarkdownDescription: "Optional. Provider-specific credentials for the DNS API (format is provider-dependent). Required when `dns_api` is set. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"email": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Registration email used by the ACME account.",
+				MarkdownDescription: "Optional. Registration email used by the ACME account for this certificate. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"domain_name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Domain name on the issued cert (as reported by LoadMaster).",
+				MarkdownDescription: "Computed. Domain name on the issued certificate as reported by LoadMaster.",
 			},
 			"expiry_date": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Expiry timestamp (LoadMaster's free-form `Mon DD HH:MM:SS YYYY GMT` format).",
+				MarkdownDescription: "Computed. Expiry timestamp in LoadMaster's format (`Mon DD HH:MM:SS YYYY GMT`).",
 			},
 			"type": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Cert algorithm (`rsa`, `ecc`).",
+				MarkdownDescription: "Computed. Certificate key algorithm (`rsa`, `ecc`).",
 			},
 			"subject_alternate_names": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Comma-separated SANs as reported by LoadMaster.",
+				MarkdownDescription: "Computed. Comma-separated Subject Alternative Names as reported by LoadMaster.",
 			},
 			"http_challenge_vs": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "VS endpoint (IP:port) used for the HTTP-01 challenge.",
+				MarkdownDescription: "Computed. VS endpoint (IP:port) used for the HTTP-01 challenge.",
 			},
 		},
 	}

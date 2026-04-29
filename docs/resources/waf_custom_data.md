@@ -24,5 +24,5 @@ resource "kemp_waf_custom_data" "bad_robots" {
 
 ### Required
 
-- `data` (String, Sensitive)
-- `filename` (String)
+- `data` (String, Sensitive) **Required.** Base64-encoded data file content. Use `base64encode(file("path/to/file"))`. Forces replacement if changed.
+- `filename` (String) **Required.** Filename of the WAF data file. Forces replacement if changed.

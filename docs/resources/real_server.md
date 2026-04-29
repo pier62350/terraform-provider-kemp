@@ -34,13 +34,13 @@ resource "kemp_real_server" "example" {
 
 ### Optional
 
-- `critical` (Boolean) Mark as critical (last-resort) backend.
-- `dns_name` (String) Optional DNS name.
-- `enable` (Boolean) Whether the real server is enabled.
-- `follow` (Number) Follow another real server's status.
-- `forward` (String) Forwarding method, e.g. `nat` or `route`.
-- `limit` (Number) Connection limit.
-- `weight` (Number) Load-balancing weight (LoadMaster default: 1000).
+- `critical` (Boolean) Optional. If true, the entire VS is marked down when this server fails. Default: `false`.
+- `dns_name` (String) Optional. DNS hostname override for this real server. Empty string disables override.
+- `enable` (Boolean) Optional. Whether the real server is enabled. Default: `true`.
+- `follow` (Number) Optional. `RsIndex` of another real server to mirror health status from. Default: `0` (disabled).
+- `forward` (String) Optional. Forwarding method: `nat` (default), `route`, or `transparent`.
+- `limit` (Number) Optional. Maximum concurrent connections to this server. Default: `0` (unlimited).
+- `weight` (Number) Optional. Load-balancing weight relative to other real servers in the pool. Default: `1000`.
 
 ### Read-Only
 

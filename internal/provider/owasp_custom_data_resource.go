@@ -43,13 +43,13 @@ func (r *OwaspCustomDataResource) Schema(_ context.Context, _ resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"filename": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Filename including extension (e.g. `owasp_cust.data`).",
+				MarkdownDescription: "**Required.** Filename including extension (e.g. `owasp_cust.data`). Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"data": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Base64-encoded data file content.",
+				MarkdownDescription: "**Required.** Base64-encoded data file content. Use `base64encode(file(\"path/to/file\"))`. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},

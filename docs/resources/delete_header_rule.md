@@ -24,10 +24,10 @@ resource "kemp_delete_header_rule" "strip_server" {
 
 ### Required
 
-- `name` (String)
-- `pattern` (String) Header-name pattern to delete (regex).
+- `name` (String) **Required.** Unique rule name. Forces replacement if changed.
+- `pattern` (String) **Required.** Header-name pattern (regex) to delete.
 
 ### Optional
 
-- `only_on_flag` (Number)
-- `only_on_no_flag` (Number)
+- `only_on_flag` (Number) Optional. Run only if rule-chain flag (1–9) is set.
+- `only_on_no_flag` (Number) Optional. Run only if rule-chain flag (1–9) is NOT set.

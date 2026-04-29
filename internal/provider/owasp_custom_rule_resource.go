@@ -43,13 +43,13 @@ func (r *OwaspCustomRuleResource) Schema(_ context.Context, _ resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"filename": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Filename including extension (e.g. `owaspcust.conf`).",
+				MarkdownDescription: "**Required.** Filename including extension (e.g. `owaspcust.conf`). Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"data": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Base64-encoded rule file content. Use `base64encode(file(\"...\"))`.",
+				MarkdownDescription: "**Required.** Base64-encoded rule file content. Use `base64encode(file(\"path/to/rule.conf\"))`. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 		},

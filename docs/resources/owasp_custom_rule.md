@@ -24,5 +24,5 @@ resource "kemp_owasp_custom_rule" "company_rules" {
 
 ### Required
 
-- `data` (String, Sensitive) Base64-encoded rule file content. Use `base64encode(file("..."))`.
-- `filename` (String) Filename including extension (e.g. `owaspcust.conf`).
+- `data` (String, Sensitive) **Required.** Base64-encoded rule file content. Use `base64encode(file("path/to/rule.conf"))`. Forces replacement if changed.
+- `filename` (String) **Required.** Filename including extension (e.g. `owaspcust.conf`). Forces replacement if changed.

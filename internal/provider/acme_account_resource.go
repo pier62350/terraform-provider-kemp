@@ -54,37 +54,37 @@ Delete calls ` + "`delacmeconfig`" + ` which only succeeds if there are no ACME 
 		Attributes: map[string]schema.Attribute{
 			"acme_type": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "ACME provider: `letsencrypt` or `digicert`.",
+				MarkdownDescription: "**Required.** ACME provider: `letsencrypt` or `digicert`. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"email": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Account registration email (Let's Encrypt). Cannot be changed after registration without delete+recreate.",
+				MarkdownDescription: "Optional. Account registration email (Let's Encrypt). Cannot be changed after registration without delete+recreate. Forces replacement if changed.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"directory_url": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "ACME directory endpoint URL. Set to `https://acme-staging-v02.api.letsencrypt.org/directory` for Let's Encrypt staging, omit for the LoadMaster's default.",
+				MarkdownDescription: "Optional. ACME directory endpoint URL. Set to `https://acme-staging-v02.api.letsencrypt.org/directory` for Let's Encrypt staging; omit to use the LoadMaster default. Default: empty (LoadMaster default).",
 				Default:             stringdefault.StaticString(""),
 			},
 			"renew_period": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Days before expiry at which LoadMaster auto-renews issued certs (1-60).",
+				MarkdownDescription: "Optional. Days before expiry at which LoadMaster auto-renews issued certs. Valid range: 1–60. Default: `30`.",
 			},
 			"kid": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "DigiCert Key ID (`setacmekid`). Only valid when `acme_type = \"2\"`. Write-only — LoadMaster does not return this value on read.",
+				MarkdownDescription: "Optional. DigiCert Key ID (`setacmekid`). Only valid when `acme_type = \"digicert\"`. Write-only — LoadMaster does not return this value on read.",
 			},
 			"hmac_key": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "DigiCert HMAC key (`setacmehmac`). Only valid when `acme_type = \"2\"`. Write-only — LoadMaster does not return this value on read.",
+				MarkdownDescription: "Optional. DigiCert HMAC key (`setacmehmac`). Only valid when `acme_type = \"digicert\"`. Write-only — LoadMaster does not return this value on read.",
 			},
-			"account_id":        schema.StringAttribute{Computed: true, MarkdownDescription: "Registered ACME account identifier."},
-			"account_directory": schema.StringAttribute{Computed: true, MarkdownDescription: "Effective ACME directory URL the account is registered against."},
+			"account_id":        schema.StringAttribute{Computed: true, MarkdownDescription: "Computed. Registered ACME account identifier returned by the ACME server."},
+			"account_directory": schema.StringAttribute{Computed: true, MarkdownDescription: "Computed. Effective ACME directory URL the account is registered against."},
 		},
 	}
 }

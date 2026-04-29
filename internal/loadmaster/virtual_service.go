@@ -21,17 +21,24 @@ type VirtualService struct {
 
 	// Standard options
 	Schedule            string `json:"Schedule,omitempty"`
+	Persist             string `json:"Persist,omitempty"`
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
+	ServerInit          *int32 `json:"ServerInit,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
 	ForceL4             *bool  `json:"ForceL4,omitempty"`
 	Transparent         *bool  `json:"Transparent,omitempty"`
 	UseforSnat          *bool  `json:"UseforSnat,omitempty"`
+	MultiConnect        *bool  `json:"MultiConnect,omitempty"`
 	Cache               *bool  `json:"Cache,omitempty"`
 	Compress            *bool  `json:"Compress,omitempty"`
 	AllowHTTP2          *bool  `json:"AllowHTTP2,omitempty"`
 	SSLReverse          *bool  `json:"SSLReverse,omitempty"`
 	SSLReencrypt        *bool  `json:"SSLReencrypt,omitempty"`
+	PassSni             *bool  `json:"PassSni,omitempty"`
+	PassCipher          *bool  `json:"PassCipher,omitempty"`
+	Verify              *int32 `json:"Verify,omitempty"`
+	ClientCert          *int32 `json:"ClientCert,omitempty"`
 	AddVia              *int32 `json:"AddVia,omitempty"`
 	RefreshPersist      *bool  `json:"RefreshPersist,omitempty"`
 	RsMinimum           *int32 `json:"RsMinimum,omitempty"`
@@ -80,17 +87,24 @@ type VirtualServiceParams struct {
 
 	// Standard options
 	Schedule            string `json:"Schedule,omitempty"`
+	Persist             string `json:"persist,omitempty"` // lowercase per wire format
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
+	ServerInit          *int32 `json:"ServerInit,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
 	ForceL4             *bool  `json:"ForceL4,omitempty"`
 	Transparent         *bool  `json:"Transparent,omitempty"`
 	UseforSnat          *bool  `json:"UseforSnat,omitempty"`
+	MultiConnect        *bool  `json:"MultiConnect,omitempty"`
 	Cache               *bool  `json:"Cache,omitempty"`
 	Compress            *bool  `json:"Compress,omitempty"`
 	AllowHTTP2          *bool  `json:"AllowHTTP2,omitempty"`
 	SSLReverse          *bool  `json:"SSLReverse,omitempty"`
 	SSLReencrypt        *bool  `json:"SSLReencrypt,omitempty"`
+	PassSni             *bool  `json:"PassSni,omitempty"`
+	PassCipher          *bool  `json:"PassCipher,omitempty"`
+	Verify              *int32 `json:"Verify,omitempty"`
+	ClientCert          *int32 `json:"ClientCert,omitempty"`
 	AddVia              *int32 `json:"AddVia,omitempty"`
 	RefreshPersist      *bool  `json:"RefreshPersist,omitempty"`
 	RsMinimum           *int32 `json:"RsMinimum,omitempty"`

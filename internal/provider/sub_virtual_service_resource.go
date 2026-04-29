@@ -42,17 +42,24 @@ type SubVirtualServiceResourceModel struct {
 
 	// Standard options
 	Schedule            types.String `tfsdk:"schedule"`
+	Persist             types.String `tfsdk:"persist"`
 	PersistTimeout      types.String `tfsdk:"persist_timeout"`
 	Idletime            types.Int64  `tfsdk:"idletime"`
+	ServerInit          types.Int64  `tfsdk:"server_init"`
 	ForceL7             types.Bool   `tfsdk:"force_l7"`
 	ForceL4             types.Bool   `tfsdk:"force_l4"`
 	Transparent         types.Bool   `tfsdk:"transparent"`
 	UseForSnat          types.Bool   `tfsdk:"use_for_snat"`
+	MultiConnect        types.Bool   `tfsdk:"multi_connect"`
 	Cache               types.Bool   `tfsdk:"cache"`
 	Compress            types.Bool   `tfsdk:"compress"`
 	AllowHTTP2          types.Bool   `tfsdk:"allow_http2"`
 	SSLReverse          types.Bool   `tfsdk:"ssl_reverse"`
 	SSLReencrypt        types.Bool   `tfsdk:"ssl_reencrypt"`
+	PassSni             types.Bool   `tfsdk:"pass_sni"`
+	PassCipher          types.Bool   `tfsdk:"pass_cipher"`
+	Verify              types.Int64  `tfsdk:"verify"`
+	ClientCert          types.Int64  `tfsdk:"client_cert"`
 	AddVia              types.String `tfsdk:"add_via"`
 	RefreshPersist      types.Bool   `tfsdk:"refresh_persist"`
 	RsMinimum           types.Int64  `tfsdk:"rs_minimum"`
@@ -112,61 +119,68 @@ The SubVS exposes the same SSL + ESP + WAF surface as the parent ` + "`kemp_virt
 				MarkdownDescription: "`Index` of the parent virtual service this SubVS attaches to.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
-			"nickname": schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Friendly name shown in the WUI."},
-			"enabled":  schema.BoolAttribute{Optional: true, Computed: true},
-			"type":     schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "VS type — `gen`, `http`, `http2`, `ts`, `tls`, `log`."},
+			"nickname": schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Friendly name for the SubVS shown in the WUI."},
+			"enabled":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Whether the SubVS is enabled. Default: `true`."},
+			"type":     schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. VS type — `gen`, `http`, `http2`, `ts`, `tls`, `log`. Default: `gen`."},
 			"ssl_acceleration": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Enable SSL/TLS termination on this SubVS.",
+				MarkdownDescription: "Optional. Enable SSL/TLS termination on this SubVS. Requires `cert_files` to be set. Default: `false`.",
 			},
 			"cert_files": schema.ListAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Names of certificates attached to this SubVS (multiple entries enable SNI).",
+				MarkdownDescription: "Optional. Names of certificates attached to this SubVS (multiple entries enable SNI — LoadMaster picks by client SNI; first entry is the fallback). Default: empty.",
 			},
-			"schedule":                schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Load-balancing algorithm: `rr`, `wlc`, `lc`, `pi`, `ph`, etc."},
-			"persist_timeout":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Persistence timeout in seconds. `0` disables persistence."},
-			"idletime":                schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Idle connection timeout in seconds."},
-			"force_l7":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Force Layer-7 processing."},
-			"force_l4":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Force Layer-4 processing (bypass Layer-7 inspection)."},
-			"transparent":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Transparent mode — preserves the client IP address when forwarding to real servers."},
-			"use_for_snat":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Use this SubVS as the source NAT address for outbound connections."},
-			"cache":          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP response caching on the LoadMaster for this SubVS."},
-			"compress":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP response compression (gzip) for this SubVS."},
-			"allow_http2":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP/2 support on this SubVS."},
-			"ssl_reverse":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Re-encrypt connections to real servers using SSL."},
-			"ssl_reencrypt":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Re-encrypt to real servers using the same SSL session parameters as the client."},
-			"add_via":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`."},
-			"refresh_persist": schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Refresh the persistence entry on every request (not just the first)."},
-			"rs_minimum":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Minimum number of active real servers required before the SubVS is marked up. `0` means no minimum."},
-			"bandwidth":               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Bandwidth limit in Mbps. `0` means unlimited."},
-			"conns_per_sec_limit":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum new connections per second. `0` means unlimited."},
-			"requests_per_sec_limit":  schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum HTTP requests per second. `0` means unlimited."},
-			"max_conns_limit":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum concurrent connections. `0` means unlimited."},
-			"check_type":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Health check type: `tcp`, `http`, `https`, `icmp`, `none`, etc."},
-			"check_port":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Port used for health checks. `0` means use the VS port."},
-			"chk_interval":            schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Interval between health checks in seconds."},
-			"chk_timeout":             schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Health check timeout in seconds."},
-			"chk_retry_count":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Consecutive failures before marking a real server down."},
-			"need_host_name":          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Send the VS hostname in the HTTP `Host` header during health checks."},
-			"check_use_http11":        schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Use HTTP/1.1 for HTTP-based health checks."},
-			"check_use_get":           schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "HTTP method for health checks: `head` (default) or `get`."},
-			"match_len":               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Bytes of health check response body to inspect for match pattern."},
-			"enhanced_health_checks":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable enhanced health checks."},
-			"esp_enabled":               schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable Edge Security Pack on this SubVS."},
-			"esp_allowed_hosts":         schema.StringAttribute{Optional: true, Computed: true},
-			"esp_allowed_directories":   schema.StringAttribute{Optional: true, Computed: true},
-			"esp_input_auth_mode":       schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Client-side auth mode: `none`, `basic`, `form`."},
-			"esp_output_auth_mode":      schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Server-side auth mode: `none`, `basic`, `form`, `kcd`."},
-			"esp_include_nested_groups": schema.BoolAttribute{Optional: true, Computed: true},
-			"esp_display_pub_priv":      schema.BoolAttribute{Optional: true, Computed: true},
-			"esp_logs":                  schema.BoolAttribute{Optional: true, Computed: true},
-			"waf_intercept_mode":           schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "WAF intercept mode: `disabled`, `legacy`, or `owasp`."},
-			"waf_blocking_paranoia":        schema.Int64Attribute{Optional: true, Computed: true},
-			"waf_alert_threshold":          schema.Int64Attribute{Optional: true, Computed: true},
-			"waf_ip_reputation_blocking":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable IP Reputation Blocking on this SubVS."},
+			"schedule":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`."},
+			"persist":          schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Persistence mode: `src` (source IP), `cookie`, `active-cookie`, `active-cookie-insert`, `ssl`, `sip`, `rdp`, `super`, `none`. Default: `none`. **Note:** LoadMaster does not return this field on read — stored in state as-set."},
+			"persist_timeout":  schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Persistence timeout in seconds. Default: `0` (persistence disabled)."},
+			"idletime":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Idle connection timeout in seconds. Default: `660`."},
+			"server_init":      schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Server-side connection initialisation timeout in seconds. Default: `0` (uses global setting)."},
+			"force_l7":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Force Layer-7 processing. Default: `true` for `http`/`http2` types."},
+			"force_l4":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Force Layer-4 processing (bypass Layer-7 inspection). Default: `false`."},
+			"transparent":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Transparent mode — preserves the client IP address when forwarding to real servers. Default: `false`."},
+			"use_for_snat":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Use this SubVS as the source NAT address for outbound connections. Default: `false`."},
+			"multi_connect":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Allow multiple simultaneous connections from the same client. Default: `false`."},
+			"cache":          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable HTTP response caching on the LoadMaster for this SubVS. Default: `false`."},
+			"compress":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable HTTP response compression (gzip) for this SubVS. Default: `false`."},
+			"allow_http2":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable HTTP/2 support on this SubVS. Default: `false`."},
+			"ssl_reverse":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Re-encrypt connections to real servers using SSL. Default: `false`."},
+			"ssl_reencrypt":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Re-encrypt to real servers using the same SSL session parameters as the client. Default: `false`."},
+			"pass_sni":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Pass the TLS SNI hostname to real servers. Default: `false`."},
+			"pass_cipher":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Pass the negotiated cipher suite to real servers. Default: `false`."},
+			"verify":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Client certificate verification level: `0` = off (default), `1` = optional, `2` = mandatory, `3` = skip CA check."},
+			"client_cert":    schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Client certificate forwarding: `0` = do not forward (default), `1` = forward if present, `2` = always require and forward."},
+			"add_via":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Whether to add a `Via` header to proxied requests: `no` (default), `add`, or `replace`."},
+			"refresh_persist": schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Refresh the persistence entry on every request, not just the first. Default: `false`."},
+			"rs_minimum":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Minimum number of active real servers required before the SubVS is marked up. Default: `0` (no minimum)."},
+			"bandwidth":               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Bandwidth limit in Mbps. Default: `0` (unlimited)."},
+			"conns_per_sec_limit":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Maximum new connections per second. Default: `0` (unlimited)."},
+			"requests_per_sec_limit":  schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Maximum HTTP requests per second. Default: `0` (unlimited)."},
+			"max_conns_limit":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Maximum concurrent connections. Default: `0` (unlimited)."},
+			"check_type":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `none`, etc. Default: `tcp`."},
+			"check_port":              schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Port used for health checks. Default: `0` (use the SubVS listening port)."},
+			"chk_interval":            schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Interval between health checks in seconds. Default: `0` (uses the global interval)."},
+			"chk_timeout":             schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Health check timeout in seconds. Default: `0` (uses the global timeout)."},
+			"chk_retry_count":         schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Consecutive failed checks before marking a real server down. Default: `0` (uses the global retry count)."},
+			"need_host_name":          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Send the VS hostname in the HTTP `Host` header during health checks. Default: `false`."},
+			"check_use_http11":        schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Use HTTP/1.1 for HTTP-based health checks. Default: `false`."},
+			"check_use_get":           schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. HTTP method for health checks: `head` (default) or `get`."},
+			"match_len":               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Bytes of the health check response body to inspect for a match pattern. Default: `0` (disabled)."},
+			"enhanced_health_checks":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable enhanced health checks (sends a more complete HTTP request including headers). Default: `false`."},
+			"esp_enabled":               schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable Kemp Edge Security Pack (ESP) on this SubVS. Default: `false`."},
+			"esp_allowed_hosts":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Newline-separated list of hostnames the SubVS will accept for ESP. Empty string matches all hosts."},
+			"esp_allowed_directories":   schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Newline-separated list of URI prefixes allowed through ESP. Empty string allows all paths."},
+			"esp_input_auth_mode":       schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Client-side authentication mode: `none` (default), `basic`, or `form`."},
+			"esp_output_auth_mode":      schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation)."},
+			"esp_include_nested_groups": schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`."},
+			"esp_display_pub_priv":      schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Display the public/private session toggle on the ESP login form. Default: `false`."},
+			"esp_logs":                  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable extended ESP logging for this SubVS. Default: `false`."},
+			"waf_intercept_mode":           schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. WAF intercept mode: `disabled` (default), `legacy` (Legacy WAF), or `owasp` (OWASP/ModSecurity WAF)."},
+			"waf_blocking_paranoia":        schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. OWASP paranoia level (`0`–`4`). Higher values activate more rules. Default: `0`."},
+			"waf_alert_threshold":          schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Anomaly score threshold that triggers blocking. Default: `0` (detection-only / audit mode)."},
+			"waf_ip_reputation_blocking":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Block requests from IP addresses with a bad reputation using the WAF IP Reputation database. Default: `false`."},
 		},
 	}
 }
@@ -205,12 +219,19 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 	if !m.Schedule.IsNull() && !m.Schedule.IsUnknown() {
 		p.Schedule = m.Schedule.ValueString()
 	}
+	if !m.Persist.IsNull() && !m.Persist.IsUnknown() {
+		p.Persist = m.Persist.ValueString()
+	}
 	if !m.PersistTimeout.IsNull() && !m.PersistTimeout.IsUnknown() {
 		p.PersistTimeout = m.PersistTimeout.ValueString()
 	}
 	if !m.Idletime.IsNull() && !m.Idletime.IsUnknown() {
 		v := int32(m.Idletime.ValueInt64())
 		p.Idletime = &v
+	}
+	if !m.ServerInit.IsNull() && !m.ServerInit.IsUnknown() {
+		v := int32(m.ServerInit.ValueInt64())
+		p.ServerInit = &v
 	}
 	if !m.ForceL7.IsNull() && !m.ForceL7.IsUnknown() {
 		p.ForceL7 = boolPtr(m.ForceL7.ValueBool())
@@ -223,6 +244,9 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 	}
 	if !m.UseForSnat.IsNull() && !m.UseForSnat.IsUnknown() {
 		p.UseforSnat = boolPtr(m.UseForSnat.ValueBool())
+	}
+	if !m.MultiConnect.IsNull() && !m.MultiConnect.IsUnknown() {
+		p.MultiConnect = boolPtr(m.MultiConnect.ValueBool())
 	}
 	if !m.Cache.IsNull() && !m.Cache.IsUnknown() {
 		p.Cache = boolPtr(m.Cache.ValueBool())
@@ -238,6 +262,20 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 	}
 	if !m.SSLReencrypt.IsNull() && !m.SSLReencrypt.IsUnknown() {
 		p.SSLReencrypt = boolPtr(m.SSLReencrypt.ValueBool())
+	}
+	if !m.PassSni.IsNull() && !m.PassSni.IsUnknown() {
+		p.PassSni = boolPtr(m.PassSni.ValueBool())
+	}
+	if !m.PassCipher.IsNull() && !m.PassCipher.IsUnknown() {
+		p.PassCipher = boolPtr(m.PassCipher.ValueBool())
+	}
+	if !m.Verify.IsNull() && !m.Verify.IsUnknown() {
+		v := int32(m.Verify.ValueInt64())
+		p.Verify = &v
+	}
+	if !m.ClientCert.IsNull() && !m.ClientCert.IsUnknown() {
+		v := int32(m.ClientCert.ValueInt64())
+		p.ClientCert = &v
 	}
 	if !m.AddVia.IsNull() && !m.AddVia.IsUnknown() {
 		p.AddVia = addViaToAPI(m.AddVia.ValueString())
@@ -362,17 +400,25 @@ func (r *SubVirtualServiceResource) writeState(ctx context.Context, vs *loadmast
 	m.CertFiles = listVal
 
 	m.Schedule = types.StringValue(vs.Schedule)
+	// m.Persist is intentionally not updated: showvs does not return the persist
+	// mode, so we preserve whatever the user last set to avoid perpetual drift.
 	m.PersistTimeout = types.StringValue(vs.PersistTimeout)
 	m.Idletime = int64FromPtr(vs.Idletime)
+	m.ServerInit = int64FromPtr(vs.ServerInit)
 	m.ForceL7 = boolFromPtr(vs.ForceL7)
 	m.ForceL4 = boolFromPtr(vs.ForceL4)
 	m.Transparent = boolFromPtr(vs.Transparent)
 	m.UseForSnat = boolFromPtr(vs.UseforSnat)
+	m.MultiConnect = boolFromPtr(vs.MultiConnect)
 	m.Cache = boolFromPtr(vs.Cache)
 	m.Compress = boolFromPtr(vs.Compress)
 	m.AllowHTTP2 = boolFromPtr(vs.AllowHTTP2)
 	m.SSLReverse = boolFromPtr(vs.SSLReverse)
 	m.SSLReencrypt = boolFromPtr(vs.SSLReencrypt)
+	m.PassSni = boolFromPtr(vs.PassSni)
+	m.PassCipher = boolFromPtr(vs.PassCipher)
+	m.Verify = int64FromPtr(vs.Verify)
+	m.ClientCert = int64FromPtr(vs.ClientCert)
 	m.AddVia = types.StringValue(addViaFromAPI(vs.AddVia))
 	m.RefreshPersist = boolFromPtr(vs.RefreshPersist)
 	m.RsMinimum = int64FromPtr(vs.RsMinimum)

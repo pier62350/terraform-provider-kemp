@@ -25,11 +25,11 @@ resource "kemp_replace_body_rule" "redact_internal_hostname" {
 
 ### Required
 
-- `name` (String)
-- `pattern` (String)
-- `replacement` (String)
+- `name` (String) **Required.** Unique rule name. Forces replacement if changed.
+- `pattern` (String) **Required.** Pattern within the response body to match (regex).
+- `replacement` (String) **Required.** Replacement string.
 
 ### Optional
 
-- `only_on_flag` (Number)
-- `only_on_no_flag` (Number)
+- `only_on_flag` (Number) Optional. Run only if rule-chain flag (1–9) is set.
+- `only_on_no_flag` (Number) Optional. Run only if rule-chain flag (1–9) is NOT set.
