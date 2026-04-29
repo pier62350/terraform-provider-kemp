@@ -92,6 +92,7 @@ resource "kemp_sub_virtual_service" "static" {
 - `waf_alert_threshold` (Number)
 - `waf_blocking_paranoia` (Number)
 - `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy`, or `owasp`.
+- `waf_ip_reputation_blocking` (Boolean) Enable IP Reputation Blocking on this SubVS.
 
 ### Read-Only
 

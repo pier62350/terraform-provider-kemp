@@ -77,9 +77,10 @@ type VirtualServiceResourceModel struct {
 	EspLogs                types.Bool   `tfsdk:"esp_logs"`
 
 	// WAF
-	WafInterceptMode    types.String `tfsdk:"waf_intercept_mode"`
-	WafBlockingParanoia types.Int64  `tfsdk:"waf_blocking_paranoia"`
-	WafAlertThreshold   types.Int64  `tfsdk:"waf_alert_threshold"`
+	WafInterceptMode         types.String `tfsdk:"waf_intercept_mode"`
+	WafBlockingParanoia      types.Int64  `tfsdk:"waf_blocking_paranoia"`
+	WafAlertThreshold        types.Int64  `tfsdk:"waf_alert_threshold"`
+	WafIpReputationBlocking  types.Bool   `tfsdk:"waf_ip_reputation_blocking"`
 }
 
 func (r *VirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -281,6 +282,11 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+			"waf_ip_reputation_blocking": schema.BoolAttribute{
+				MarkdownDescription: "Enable IP Reputation Blocking. When enabled, requests from IP addresses with a bad reputation are blocked by the WAF.",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -420,6 +426,9 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 		v := int32(m.WafAlertThreshold.ValueInt64())
 		p.AlertThreshold = &v
 	}
+	if !m.WafIpReputationBlocking.IsNull() && !m.WafIpReputationBlocking.IsUnknown() {
+		p.IPReputationBlocking = boolPtr(m.WafIpReputationBlocking.ValueBool())
+	}
 	return p, diags
 }
 
@@ -482,6 +491,7 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.WafInterceptMode = types.StringValue(wafInterceptModeFromAPI(vs.InterceptMode))
 	m.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
 	m.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
+	m.WafIpReputationBlocking = boolFromPtr(vs.IPReputationBlocking)
 
 	return diags
 }

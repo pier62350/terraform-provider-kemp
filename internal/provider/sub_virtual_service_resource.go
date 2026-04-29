@@ -73,9 +73,10 @@ type SubVirtualServiceResourceModel struct {
 	EspLogs                types.Bool   `tfsdk:"esp_logs"`
 
 	// WAF
-	WafInterceptMode    types.String `tfsdk:"waf_intercept_mode"`
-	WafBlockingParanoia types.Int64  `tfsdk:"waf_blocking_paranoia"`
-	WafAlertThreshold   types.Int64  `tfsdk:"waf_alert_threshold"`
+	WafInterceptMode        types.String `tfsdk:"waf_intercept_mode"`
+	WafBlockingParanoia     types.Int64  `tfsdk:"waf_blocking_paranoia"`
+	WafAlertThreshold       types.Int64  `tfsdk:"waf_alert_threshold"`
+	WafIpReputationBlocking types.Bool   `tfsdk:"waf_ip_reputation_blocking"`
 }
 
 func (r *SubVirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -140,9 +141,10 @@ The SubVS exposes the same SSL + ESP + WAF surface as the parent ` + "`kemp_virt
 			"esp_include_nested_groups": schema.BoolAttribute{Optional: true, Computed: true},
 			"esp_display_pub_priv":      schema.BoolAttribute{Optional: true, Computed: true},
 			"esp_logs":                  schema.BoolAttribute{Optional: true, Computed: true},
-			"waf_intercept_mode":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "WAF intercept mode: `disabled`, `legacy`, or `owasp`."},
-			"waf_blocking_paranoia":     schema.Int64Attribute{Optional: true, Computed: true},
-			"waf_alert_threshold":       schema.Int64Attribute{Optional: true, Computed: true},
+			"waf_intercept_mode":           schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "WAF intercept mode: `disabled`, `legacy`, or `owasp`."},
+			"waf_blocking_paranoia":        schema.Int64Attribute{Optional: true, Computed: true},
+			"waf_alert_threshold":          schema.Int64Attribute{Optional: true, Computed: true},
+			"waf_ip_reputation_blocking":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable IP Reputation Blocking on this SubVS."},
 		},
 	}
 }
@@ -276,6 +278,9 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 		v := int32(m.WafAlertThreshold.ValueInt64())
 		p.AlertThreshold = &v
 	}
+	if !m.WafIpReputationBlocking.IsNull() && !m.WafIpReputationBlocking.IsUnknown() {
+		p.IPReputationBlocking = boolPtr(m.WafIpReputationBlocking.ValueBool())
+	}
 	return p, diags
 }
 
@@ -332,6 +337,7 @@ func (r *SubVirtualServiceResource) writeState(ctx context.Context, vs *loadmast
 	m.WafInterceptMode = types.StringValue(wafInterceptModeFromAPI(vs.InterceptMode))
 	m.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
 	m.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
+	m.WafIpReputationBlocking = boolFromPtr(vs.IPReputationBlocking)
 
 	return diags
 }

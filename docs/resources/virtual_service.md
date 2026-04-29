@@ -68,6 +68,7 @@ resource "kemp_virtual_service" "example" {
 - `waf_alert_threshold` (Number) Anomaly score that triggers blocking. Set to 0 for detection-only (audit) mode.
 - `waf_blocking_paranoia` (Number) OWASP paranoia level (0-4). Higher = more rules trigger, more false positives.
 - `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy` (Legacy WAF), or `owasp` (OWASP WAF).
+- `waf_ip_reputation_blocking` (Boolean) Enable IP Reputation Blocking. When enabled, requests from IP addresses with a bad reputation are blocked by the WAF.
 
 ### Read-Only
 

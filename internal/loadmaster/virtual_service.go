@@ -52,9 +52,10 @@ type VirtualService struct {
 	EspLogs             *bool  `json:"EspLogs,omitempty"`
 
 	// WAF
-	InterceptMode    string `json:"InterceptMode,omitempty"`
-	BlockingParanoia *int32 `json:"BlockingParanoia,omitempty"`
-	AlertThreshold   *int32 `json:"AlertThreshold,omitempty"`
+	InterceptMode        string `json:"InterceptMode,omitempty"`
+	BlockingParanoia     *int32 `json:"BlockingParanoia,omitempty"`
+	AlertThreshold       *int32 `json:"AlertThreshold,omitempty"`
+	IPReputationBlocking *bool  `json:"IPReputationBlocking,omitempty"`
 }
 
 // VirtualServiceParams are the optional knobs for create/modify.
@@ -99,9 +100,10 @@ type VirtualServiceParams struct {
 	EspLogs             *bool  `json:"EspLogs,omitempty"`
 
 	// WAF
-	InterceptMode    string `json:"InterceptMode,omitempty"`
-	BlockingParanoia *int32 `json:"BlockingParanoia,omitempty"`
-	AlertThreshold   *int32 `json:"AlertThreshold,omitempty"`
+	InterceptMode        string `json:"InterceptMode,omitempty"`
+	BlockingParanoia     *int32 `json:"BlockingParanoia,omitempty"`
+	AlertThreshold       *int32 `json:"AlertThreshold,omitempty"`
+	IPReputationBlocking *bool  `json:"IPReputationBlocking,omitempty"`
 }
 
 type vsResponse struct {
