@@ -18,6 +18,7 @@ type VirtualService struct {
 	Enable          *bool  `json:"Enable,omitempty"`
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
+	CipherSet       string `json:"CipherSet,omitempty"`
 
 	// Standard options
 	Schedule            string `json:"Schedule,omitempty"`
@@ -84,6 +85,7 @@ type VirtualServiceParams struct {
 	Enable          *bool  `json:"Enable,omitempty"`
 	SSLAcceleration *bool  `json:"SSLAcceleration,omitempty"`
 	CertFile        string `json:"CertFile,omitempty"`
+	CipherSet       string `json:"CipherSet,omitempty"`
 
 	// Standard options
 	Schedule            string `json:"Schedule,omitempty"`

@@ -43,6 +43,7 @@ type VirtualServiceResourceModel struct {
 	Enabled         types.Bool   `tfsdk:"enabled"`
 	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
 	CertFiles       types.List   `tfsdk:"cert_files"`
+	CipherSet       types.String `tfsdk:"cipher_set"`
 
 	// Standard options
 	Schedule            types.String `tfsdk:"schedule"`
@@ -152,6 +153,11 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"cert_files": schema.ListAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Optional. Names of certificates (as stored on the LoadMaster) attached to this VS. Multiple entries enable SNI — LoadMaster picks the cert whose subject matches the client SNI hostname; first entry is the fallback default.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"cipher_set": schema.StringAttribute{
+				MarkdownDescription: "Optional. Name of the TLS cipher set to use for this VS. Must reference an existing cipher set (built-in or managed via `kemp_cipher_set`). Empty string uses the LoadMaster default.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -433,6 +439,9 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 			p.CertFile = strings.Join(certs, ",")
 		}
 	}
+	if !m.CipherSet.IsNull() && !m.CipherSet.IsUnknown() {
+		p.CipherSet = m.CipherSet.ValueString()
+	}
 
 	if !m.Schedule.IsNull() && !m.Schedule.IsUnknown() {
 		p.Schedule = m.Schedule.ValueString()
@@ -625,6 +634,7 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	}
 	listVal, diags := types.ListValueFrom(ctx, types.StringType, certs)
 	m.CertFiles = listVal
+	m.CipherSet = types.StringValue(vs.CipherSet)
 
 	m.Schedule = types.StringValue(vs.Schedule)
 	// m.Persist is intentionally not updated: showvs does not return the persist

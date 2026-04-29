@@ -46,6 +46,7 @@ resource "kemp_virtual_service" "example" {
 - `chk_interval` (Number) Optional. Interval between health checks in seconds. Default: `0` (uses the global health-check interval).
 - `chk_retry_count` (Number) Optional. Consecutive failed health checks before a real server is marked down. Default: `0` (uses the global retry count).
 - `chk_timeout` (Number) Optional. Health check timeout in seconds. Default: `0` (uses the global timeout).
+- `cipher_set` (String) Optional. Name of the TLS cipher set to use for this VS. Must reference an existing cipher set (built-in or managed via `kemp_cipher_set`). Empty string uses the LoadMaster default.
 - `client_cert` (Number) Optional. Client certificate forwarding: `0` = do not forward (default), `1` = forward if present, `2` = always require and forward.
 - `compress` (Boolean) Optional. Enable HTTP response compression (gzip) for this VS. Default: `false`.
 - `conns_per_sec_limit` (Number) Optional. Maximum new connections per second. Default: `0` (unlimited).
