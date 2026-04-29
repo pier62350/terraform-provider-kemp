@@ -76,6 +76,22 @@ type VirtualService struct {
 	BlockingParanoia     *int32 `json:"BlockingParanoia,omitempty"`
 	AlertThreshold       *int32 `json:"AlertThreshold,omitempty"`
 	IPReputationBlocking *bool  `json:"IPReputationBlocking,omitempty"`
+
+	// Not-available handling
+	ErrorCode   string `json:"ErrorCode,omitempty"`
+	RedirectURL string `json:"RedirectURL,omitempty"`
+
+	// Advanced
+	QoS                   *int32 `json:"QoS,omitempty"`
+	Transactionlimit      *int32 `json:"Transactionlimit,omitempty"`
+	SubnetOriginating     *bool  `json:"SubnetOriginating,omitempty"`
+	FollowVSID            *int32 `json:"FollowVSID,omitempty"`
+	OCSPVerify            *bool  `json:"OCSPVerify,omitempty"`
+	VerifyBearer          *bool  `json:"VerifyBearer,omitempty"`
+	SecurityHeaderOptions *int32 `json:"SecurityHeaderOptions,omitempty"`
+	SameSite              *int32 `json:"SameSite,omitempty"`
+	StartTLSMode          *int32 `json:"StartTLSMode,omitempty"`
+	SSLRewrite            string `json:"SSLRewrite,omitempty"`
 }
 
 // VirtualServiceParams are the optional knobs for create/modify.
@@ -144,6 +160,22 @@ type VirtualServiceParams struct {
 	BlockingParanoia     *int32 `json:"BlockingParanoia,omitempty"`
 	AlertThreshold       *int32 `json:"AlertThreshold,omitempty"`
 	IPReputationBlocking *bool  `json:"IPReputationBlocking,omitempty"`
+
+	// Not-available handling
+	ErrorCode   string `json:"ErrorCode,omitempty"`
+	RedirectURL string `json:"RedirectURL,omitempty"`
+
+	// Advanced
+	QoS                   *int32 `json:"QoS,omitempty"`
+	Transactionlimit      *int32 `json:"Transactionlimit,omitempty"`
+	SubnetOriginating     *bool  `json:"SubnetOriginating,omitempty"`
+	FollowVSID            *int32 `json:"FollowVSID,omitempty"`
+	OCSPVerify            *bool  `json:"OCSPVerify,omitempty"`
+	VerifyBearer          *bool  `json:"VerifyBearer,omitempty"`
+	SecurityHeaderOptions *int32 `json:"SecurityHeaderOptions,omitempty"`
+	SameSite              *int32 `json:"SameSite,omitempty"`
+	StartTLSMode          *int32 `json:"StartTLSMode,omitempty"`
+	SSLRewrite            string `json:"SSLRewrite,omitempty"`
 }
 
 type vsResponse struct {

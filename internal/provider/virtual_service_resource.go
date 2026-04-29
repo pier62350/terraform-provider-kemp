@@ -102,10 +102,26 @@ type VirtualServiceResourceModel struct {
 	EspLogs                types.Bool   `tfsdk:"esp_logs"`
 
 	// WAF
-	WafInterceptMode         types.String `tfsdk:"waf_intercept_mode"`
-	WafBlockingParanoia      types.Int64  `tfsdk:"waf_blocking_paranoia"`
-	WafAlertThreshold        types.Int64  `tfsdk:"waf_alert_threshold"`
-	WafIpReputationBlocking  types.Bool   `tfsdk:"waf_ip_reputation_blocking"`
+	WafInterceptMode        types.String `tfsdk:"waf_intercept_mode"`
+	WafBlockingParanoia     types.Int64  `tfsdk:"waf_blocking_paranoia"`
+	WafAlertThreshold       types.Int64  `tfsdk:"waf_alert_threshold"`
+	WafIpReputationBlocking types.Bool   `tfsdk:"waf_ip_reputation_blocking"`
+
+	// Not-available handling
+	ErrorCode   types.String `tfsdk:"error_code"`
+	RedirectURL types.String `tfsdk:"redirect_url"`
+
+	// Advanced
+	QoS                   types.Int64  `tfsdk:"qos"`
+	Transactionlimit      types.Int64  `tfsdk:"transaction_limit"`
+	SubnetOriginating     types.Bool   `tfsdk:"subnet_originating"`
+	FollowVSID            types.Int64  `tfsdk:"follow_vs_id"`
+	OCSPVerify            types.Bool   `tfsdk:"ocsp_verify"`
+	VerifyBearer          types.Bool   `tfsdk:"verify_bearer"`
+	SecurityHeaderOptions types.Int64  `tfsdk:"security_header_options"`
+	SameSite              types.Int64  `tfsdk:"same_site"`
+	StartTLSMode          types.Int64  `tfsdk:"start_tls_mode"`
+	SSLRewrite            types.String `tfsdk:"ssl_rewrite"`
 }
 
 func (r *VirtualServiceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -437,6 +453,70 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+
+			// Not-available handling
+			"error_code": schema.StringAttribute{
+				MarkdownDescription: "Optional. HTTP response code sent to clients when no real servers are available (e.g. `\"503\"` or `\"302\"` for a redirect). Default: `\"0\"` (LoadMaster built-in error page). Use with `redirect_url` when set to a redirect code.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"redirect_url": schema.StringAttribute{
+				MarkdownDescription: "Optional. URL to redirect clients to when no real servers are available. Only effective when `error_code` is a redirect code such as `\"302\"`.",
+				Optional:            true,
+				Computed:            true,
+			},
+
+			// Advanced
+			"qos": schema.Int64Attribute{
+				MarkdownDescription: "Optional. DSCP QoS marking applied to packets from this VS. Valid values: `0`–`63`. Default: `0` (no marking).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"transaction_limit": schema.Int64Attribute{
+				MarkdownDescription: "Optional. Maximum transactions per second allowed on this VS. `0` = unlimited. Default: `0`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"subnet_originating": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable subnet-originating mode — the LoadMaster uses the client's subnet as the source address when forwarding to real servers. Default: `false`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"follow_vs_id": schema.Int64Attribute{
+				MarkdownDescription: "Optional. Index of another VS whose health state this VS mirrors. `0` = disabled (independent health). Default: `0`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"ocsp_verify": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable OCSP certificate verification for client certificates. Default: `false`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"verify_bearer": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable JWT bearer token verification via ESP. Default: `false`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"security_header_options": schema.Int64Attribute{
+				MarkdownDescription: "Optional. Bitmask controlling which HTTP security headers the LoadMaster injects (e.g. HSTS, X-Frame-Options). `0` = none injected. Default: `0`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"same_site": schema.Int64Attribute{
+				MarkdownDescription: "Optional. SameSite cookie attribute injected by the LoadMaster: `0` = off, `1` = Lax, `2` = Strict, `3` = None. Default: `0`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"start_tls_mode": schema.Int64Attribute{
+				MarkdownDescription: "Optional. STARTTLS behaviour for SMTP/LDAP VSes: `0` = disabled, `1` = allowed, `2` = required. Default: `0`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"ssl_rewrite": schema.StringAttribute{
+				MarkdownDescription: "Optional. SSL rewrite mode. `\"0\"` = disabled. Default: `\"0\"`.",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -682,6 +762,53 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	if !m.WafIpReputationBlocking.IsNull() && !m.WafIpReputationBlocking.IsUnknown() {
 		p.IPReputationBlocking = boolPtr(m.WafIpReputationBlocking.ValueBool())
 	}
+
+	// Not-available handling
+	if !m.ErrorCode.IsNull() && !m.ErrorCode.IsUnknown() {
+		p.ErrorCode = m.ErrorCode.ValueString()
+	}
+	if !m.RedirectURL.IsNull() && !m.RedirectURL.IsUnknown() {
+		p.RedirectURL = m.RedirectURL.ValueString()
+	}
+
+	// Advanced
+	if !m.QoS.IsNull() && !m.QoS.IsUnknown() {
+		v := int32(m.QoS.ValueInt64())
+		p.QoS = &v
+	}
+	if !m.Transactionlimit.IsNull() && !m.Transactionlimit.IsUnknown() {
+		v := int32(m.Transactionlimit.ValueInt64())
+		p.Transactionlimit = &v
+	}
+	if !m.SubnetOriginating.IsNull() && !m.SubnetOriginating.IsUnknown() {
+		p.SubnetOriginating = boolPtr(m.SubnetOriginating.ValueBool())
+	}
+	if !m.FollowVSID.IsNull() && !m.FollowVSID.IsUnknown() {
+		v := int32(m.FollowVSID.ValueInt64())
+		p.FollowVSID = &v
+	}
+	if !m.OCSPVerify.IsNull() && !m.OCSPVerify.IsUnknown() {
+		p.OCSPVerify = boolPtr(m.OCSPVerify.ValueBool())
+	}
+	if !m.VerifyBearer.IsNull() && !m.VerifyBearer.IsUnknown() {
+		p.VerifyBearer = boolPtr(m.VerifyBearer.ValueBool())
+	}
+	if !m.SecurityHeaderOptions.IsNull() && !m.SecurityHeaderOptions.IsUnknown() {
+		v := int32(m.SecurityHeaderOptions.ValueInt64())
+		p.SecurityHeaderOptions = &v
+	}
+	if !m.SameSite.IsNull() && !m.SameSite.IsUnknown() {
+		v := int32(m.SameSite.ValueInt64())
+		p.SameSite = &v
+	}
+	if !m.StartTLSMode.IsNull() && !m.StartTLSMode.IsUnknown() {
+		v := int32(m.StartTLSMode.ValueInt64())
+		p.StartTLSMode = &v
+	}
+	if !m.SSLRewrite.IsNull() && !m.SSLRewrite.IsUnknown() {
+		p.SSLRewrite = m.SSLRewrite.ValueString()
+	}
+
 	return p, diags
 }
 
@@ -766,6 +893,22 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.WafBlockingParanoia = int64FromPtr(vs.BlockingParanoia)
 	m.WafAlertThreshold = int64FromPtr(vs.AlertThreshold)
 	m.WafIpReputationBlocking = boolFromPtr(vs.IPReputationBlocking)
+
+	// Not-available handling
+	m.ErrorCode = types.StringValue(vs.ErrorCode)
+	m.RedirectURL = types.StringValue(vs.RedirectURL)
+
+	// Advanced
+	m.QoS = int64FromPtr(vs.QoS)
+	m.Transactionlimit = int64FromPtr(vs.Transactionlimit)
+	m.SubnetOriginating = boolFromPtr(vs.SubnetOriginating)
+	m.FollowVSID = int64FromPtr(vs.FollowVSID)
+	m.OCSPVerify = boolFromPtr(vs.OCSPVerify)
+	m.VerifyBearer = boolFromPtr(vs.VerifyBearer)
+	m.SecurityHeaderOptions = int64FromPtr(vs.SecurityHeaderOptions)
+	m.SameSite = int64FromPtr(vs.SameSite)
+	m.StartTLSMode = int64FromPtr(vs.StartTLSMode)
+	m.SSLRewrite = types.StringValue(vs.SSLRewrite)
 
 	return diags
 }

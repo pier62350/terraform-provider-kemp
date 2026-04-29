@@ -52,6 +52,7 @@ resource "kemp_virtual_service" "example" {
 - `conns_per_sec_limit` (Number) Optional. Maximum new connections per second. Default: `0` (unlimited).
 - `enabled` (Boolean) Optional. Whether the virtual service is enabled. Default: `true`.
 - `enhanced_health_checks` (Boolean) Optional. Enable enhanced health checks (sends a more complete HTTP request including headers). Default: `false`.
+- `error_code` (String) Optional. HTTP response code sent to clients when no real servers are available (e.g. `"503"` or `"302"` for a redirect). Default: `"0"` (LoadMaster built-in error page). Use with `redirect_url` when set to a redirect code.
 - `esp_allowed_directories` (String) Optional. Newline-separated list of URI prefixes allowed through ESP. Empty string allows all paths.
 - `esp_allowed_hosts` (String) Optional. Newline-separated list of hostnames the VS will accept for ESP. Empty string matches all hosts.
 - `esp_display_pub_priv` (Boolean) Optional. Display the public/private session toggle on the ESP login form. Default: `false`.
@@ -60,6 +61,7 @@ resource "kemp_virtual_service" "example" {
 - `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.
 - `esp_logs` (Boolean) Optional. Enable extended ESP logging for this VS. Default: `false`.
 - `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).
+- `follow_vs_id` (Number) Optional. Index of another VS whose health state this VS mirrors. `0` = disabled (independent health). Default: `0`.
 - `force_l4` (Boolean) Optional. Force Layer-4 processing, bypassing Layer-7 inspection. Default: `false`.
 - `force_l7` (Boolean) Optional. Force Layer-7 processing even when the VS is configured as Layer-4. Default: `true` for `http`/`http2` types.
 - `idletime` (Number) Optional. Idle connection timeout in seconds. Default: `660`.
@@ -68,27 +70,37 @@ resource "kemp_virtual_service" "example" {
 - `multi_connect` (Boolean) Optional. Allow multiple simultaneous connections from the same client. Default: `false`.
 - `need_host_name` (Boolean) Optional. Send the VS hostname in the HTTP `Host` header during health checks. Default: `false`.
 - `nickname` (String) Optional. Friendly name for the virtual service shown in the WUI.
+- `ocsp_verify` (Boolean) Optional. Enable OCSP certificate verification for client certificates. Default: `false`.
 - `pass_cipher` (Boolean) Optional. Pass the negotiated cipher suite to real servers. Default: `false`.
 - `pass_sni` (Boolean) Optional. Pass the TLS SNI hostname from the client to real servers. Default: `false`.
 - `persist` (String) Optional. Persistence mode: `src` (source IP), `cookie`, `active-cookie`, `active-cookie-insert`, `ssl`, `sip`, `rdp`, `super`, `none`. Default: `none`. **Note:** LoadMaster does not return this field on read — it is stored in state as-set and not reconciled on refresh.
 - `persist_timeout` (String) Optional. Persistence timeout in seconds. Default: `0` (persistence disabled).
+- `qos` (Number) Optional. DSCP QoS marking applied to packets from this VS. Valid values: `0`–`63`. Default: `0` (no marking).
+- `redirect_url` (String) Optional. URL to redirect clients to when no real servers are available. Only effective when `error_code` is a redirect code such as `"302"`.
 - `refresh_persist` (Boolean) Optional. Refresh the persistence entry on every request, not just the first. Default: `false`.
 - `requests_per_sec_limit` (Number) Optional. Maximum HTTP requests per second. Default: `0` (unlimited).
 - `rs_minimum` (Number) Optional. Minimum number of active real servers required before the VS is marked up. Default: `0` (no minimum).
+- `same_site` (Number) Optional. SameSite cookie attribute injected by the LoadMaster: `0` = off, `1` = Lax, `2` = Strict, `3` = None. Default: `0`.
 - `schedule` (String) Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`.
+- `security_header_options` (Number) Optional. Bitmask controlling which HTTP security headers the LoadMaster injects (e.g. HSTS, X-Frame-Options). `0` = none injected. Default: `0`.
 - `server_init` (Number) Optional. Server-side connection initialisation timeout in seconds. Default: `0` (uses global setting).
 - `ssl3_enabled` (Boolean) Optional. Enable SSLv3. Default: `false` (disabled — SSLv3 is insecure).
 - `ssl_acceleration` (Boolean) Optional. Enable SSL/TLS termination on the LoadMaster. Requires `cert_files` to be set. Default: `false`.
 - `ssl_reencrypt` (Boolean) Optional. Re-encrypt to real servers using the same SSL session parameters as the client connection. Default: `false`.
 - `ssl_reverse` (Boolean) Optional. Re-encrypt connections to real servers using SSL (SSL offload in reverse — LoadMaster decrypts then re-encrypts). Default: `false`.
+- `ssl_rewrite` (String) Optional. SSL rewrite mode. `"0"` = disabled. Default: `"0"`.
+- `start_tls_mode` (Number) Optional. STARTTLS behaviour for SMTP/LDAP VSes: `0` = disabled, `1` = allowed, `2` = required. Default: `0`.
+- `subnet_originating` (Boolean) Optional. Enable subnet-originating mode — the LoadMaster uses the client's subnet as the source address when forwarding to real servers. Default: `false`.
 - `tls10_enabled` (Boolean) Optional. Enable TLS 1.0. Default: `false` (disabled).
 - `tls11_enabled` (Boolean) Optional. Enable TLS 1.1. Default: `false` (disabled).
 - `tls12_enabled` (Boolean) Optional. Enable TLS 1.2. Default: `true`.
 - `tls13_enabled` (Boolean) Optional. Enable TLS 1.3. Default: `true`. Only available when `SSLOldLibraryVersion` is disabled on the LoadMaster global settings.
+- `transaction_limit` (Number) Optional. Maximum transactions per second allowed on this VS. `0` = unlimited. Default: `0`.
 - `transparent` (Boolean) Optional. Transparent mode — preserves the original client IP when forwarding to real servers. Default: `false`.
 - `type` (String) Optional. VS type — one of `gen`, `http`, `http2`, `ts`, `tls`, `log`. Default: `gen`.
 - `use_for_snat` (Boolean) Optional. Use this VS as the source NAT address for outbound connections. Default: `false`.
 - `verify` (Number) Optional. Client certificate verification level: `0` = off (default), `1` = request (optional), `2` = require, `3` = require and skip CA check.
+- `verify_bearer` (Boolean) Optional. Enable JWT bearer token verification via ESP. Default: `false`.
 - `waf_alert_threshold` (Number) Optional. Anomaly score threshold that triggers blocking. Default: `0` (detection-only / audit mode).
 - `waf_blocking_paranoia` (Number) Optional. OWASP paranoia level (`0`–`4`). Higher values activate more rules and reduce false negatives at the cost of more false positives. Default: `0`.
 - `waf_intercept_mode` (String) Optional. WAF intercept mode: `disabled` (default), `legacy` (Legacy WAF), or `owasp` (OWASP/ModSecurity WAF). Note: switching between `legacy` and `owasp` requires disabling WAF first.
