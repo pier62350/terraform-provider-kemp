@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -167,29 +168,34 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Computed:            true,
 			},
 			"ssl3_enabled": schema.BoolAttribute{
-				MarkdownDescription: "Optional. Enable SSLv3. Default: `true`. **SSLv3 is insecure — disable it in production** (`ssl3_enabled = false`).",
+				MarkdownDescription: "Optional. Enable SSLv3. Default: `false` (disabled — SSLv3 is insecure).",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"tls10_enabled": schema.BoolAttribute{
-				MarkdownDescription: "Optional. Enable TLS 1.0. Default: `true`.",
+				MarkdownDescription: "Optional. Enable TLS 1.0. Default: `false` (disabled).",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"tls11_enabled": schema.BoolAttribute{
-				MarkdownDescription: "Optional. Enable TLS 1.1. Default: `true`.",
+				MarkdownDescription: "Optional. Enable TLS 1.1. Default: `false` (disabled).",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"tls12_enabled": schema.BoolAttribute{
 				MarkdownDescription: "Optional. Enable TLS 1.2. Default: `true`.",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(true),
 			},
 			"tls13_enabled": schema.BoolAttribute{
 				MarkdownDescription: "Optional. Enable TLS 1.3. Default: `true`. Only available when `SSLOldLibraryVersion` is disabled on the LoadMaster global settings.",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(true),
 			},
 			"schedule": schema.StringAttribute{
 				MarkdownDescription: "Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`.",
