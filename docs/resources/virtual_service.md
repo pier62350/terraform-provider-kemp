@@ -77,9 +77,14 @@ resource "kemp_virtual_service" "example" {
 - `rs_minimum` (Number) Optional. Minimum number of active real servers required before the VS is marked up. Default: `0` (no minimum).
 - `schedule` (String) Optional. Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc. Default: `rr`.
 - `server_init` (Number) Optional. Server-side connection initialisation timeout in seconds. Default: `0` (uses global setting).
+- `ssl3_enabled` (Boolean) Optional. Enable SSLv3. Default: `true`. **SSLv3 is insecure — disable it in production** (`ssl3_enabled = false`).
 - `ssl_acceleration` (Boolean) Optional. Enable SSL/TLS termination on the LoadMaster. Requires `cert_files` to be set. Default: `false`.
 - `ssl_reencrypt` (Boolean) Optional. Re-encrypt to real servers using the same SSL session parameters as the client connection. Default: `false`.
 - `ssl_reverse` (Boolean) Optional. Re-encrypt connections to real servers using SSL (SSL offload in reverse — LoadMaster decrypts then re-encrypts). Default: `false`.
+- `tls10_enabled` (Boolean) Optional. Enable TLS 1.0. Default: `true`.
+- `tls11_enabled` (Boolean) Optional. Enable TLS 1.1. Default: `true`.
+- `tls12_enabled` (Boolean) Optional. Enable TLS 1.2. Default: `true`.
+- `tls13_enabled` (Boolean) Optional. Enable TLS 1.3. Default: `true`. Only available when `SSLOldLibraryVersion` is disabled on the LoadMaster global settings.
 - `transparent` (Boolean) Optional. Transparent mode — preserves the original client IP when forwarding to real servers. Default: `false`.
 - `type` (String) Optional. VS type — one of `gen`, `http`, `http2`, `ts`, `tls`, `log`. Default: `gen`.
 - `use_for_snat` (Boolean) Optional. Use this VS as the source NAT address for outbound connections. Default: `false`.

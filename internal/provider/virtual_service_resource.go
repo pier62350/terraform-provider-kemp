@@ -44,6 +44,11 @@ type VirtualServiceResourceModel struct {
 	SSLAcceleration types.Bool   `tfsdk:"ssl_acceleration"`
 	CertFiles       types.List   `tfsdk:"cert_files"`
 	CipherSet       types.String `tfsdk:"cipher_set"`
+	SSL3Enabled     types.Bool   `tfsdk:"ssl3_enabled"`
+	TLS10Enabled    types.Bool   `tfsdk:"tls10_enabled"`
+	TLS11Enabled    types.Bool   `tfsdk:"tls11_enabled"`
+	TLS12Enabled    types.Bool   `tfsdk:"tls12_enabled"`
+	TLS13Enabled    types.Bool   `tfsdk:"tls13_enabled"`
 
 	// Standard options
 	Schedule            types.String `tfsdk:"schedule"`
@@ -158,6 +163,31 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 			},
 			"cipher_set": schema.StringAttribute{
 				MarkdownDescription: "Optional. Name of the TLS cipher set to use for this VS. Must reference an existing cipher set (built-in or managed via `kemp_cipher_set`). Empty string uses the LoadMaster default.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"ssl3_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable SSLv3. Default: `true`. **SSLv3 is insecure — disable it in production** (`ssl3_enabled = false`).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"tls10_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable TLS 1.0. Default: `true`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"tls11_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable TLS 1.1. Default: `true`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"tls12_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable TLS 1.2. Default: `true`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"tls13_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Optional. Enable TLS 1.3. Default: `true`. Only available when `SSLOldLibraryVersion` is disabled on the LoadMaster global settings.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -420,6 +450,45 @@ func (r *VirtualServiceResource) Configure(_ context.Context, req resource.Confi
 	r.client = client
 }
 
+// tlsTypeBitmask encodes 5 protocol enable flags into the TlsType wire value.
+// A bit being set means the protocol is disabled; 0 = all protocols enabled.
+// Returns ("", false) when no flag was explicitly set (no TlsType sent to API).
+func tlsTypeBitmask(ssl3, tls10, tls11, tls12, tls13 types.Bool) (string, bool) {
+	anySet := false
+	for _, b := range []types.Bool{ssl3, tls10, tls11, tls12, tls13} {
+		if !b.IsNull() && !b.IsUnknown() {
+			anySet = true
+			break
+		}
+	}
+	if !anySet {
+		return "", false
+	}
+	bval := func(b types.Bool) bool {
+		if b.IsNull() || b.IsUnknown() {
+			return true
+		}
+		return b.ValueBool()
+	}
+	var v int
+	if !bval(ssl3)  { v |= 1 }
+	if !bval(tls10) { v |= 2 }
+	if !bval(tls11) { v |= 4 }
+	if !bval(tls12) { v |= 8 }
+	if !bval(tls13) { v |= 16 }
+	return strconv.Itoa(v), true
+}
+
+// decodeTLSType unpacks a TlsType bitmask string into per-protocol enable flags.
+func decodeTLSType(raw string) (ssl3, tls10, tls11, tls12, tls13 types.Bool) {
+	v, _ := strconv.Atoi(raw)
+	return types.BoolValue((v & 1) == 0),
+		types.BoolValue((v & 2) == 0),
+		types.BoolValue((v & 4) == 0),
+		types.BoolValue((v & 8) == 0),
+		types.BoolValue((v & 16) == 0)
+}
+
 func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualServiceResourceModel) (loadmaster.VirtualServiceParams, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	p := loadmaster.VirtualServiceParams{
@@ -441,6 +510,9 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	}
 	if !m.CipherSet.IsNull() && !m.CipherSet.IsUnknown() {
 		p.CipherSet = m.CipherSet.ValueString()
+	}
+	if tlsVal, ok := tlsTypeBitmask(m.SSL3Enabled, m.TLS10Enabled, m.TLS11Enabled, m.TLS12Enabled, m.TLS13Enabled); ok {
+		p.TlsType = tlsVal
 	}
 
 	if !m.Schedule.IsNull() && !m.Schedule.IsUnknown() {
@@ -635,6 +707,7 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	listVal, diags := types.ListValueFrom(ctx, types.StringType, certs)
 	m.CertFiles = listVal
 	m.CipherSet = types.StringValue(vs.CipherSet)
+	m.SSL3Enabled, m.TLS10Enabled, m.TLS11Enabled, m.TLS12Enabled, m.TLS13Enabled = decodeTLSType(vs.TlsType)
 
 	m.Schedule = types.StringValue(vs.Schedule)
 	// m.Persist is intentionally not updated: showvs does not return the persist
