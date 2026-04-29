@@ -161,12 +161,12 @@ Examples in this repo use `10.0.x.x` for that reason.
 
 ## Roadmap (loose, in priority order)
 
-- ACME renew action resource (`renewacmecert` — currently exposed only at
-  the client level, not as a TF action)
-- Live smoke tests for the rule and SubVS resources
-- More VS schema fields from `VirtualServiceParametersStandardOptions`
-  (Cookie, Persist, Idletime, ForceL7, etc.)
-- DigiCert-specific account fields (`setacmekid`, `setacmehmac`)
-- A `kemp_certificates` data source for discovery
-- Bump `crazy-max/ghaction-import-gpg` and `goreleaser/goreleaser-action`
-  past Node 20 once their v7+ ships (deadline 2026-09-16)
+- Live acceptance/smoke tests for `kemp_sub_virtual_service` and
+  `kemp_sub_virtual_service_rule` (no TF_ACC coverage yet)
+- `kemp_sub_virtual_service_rule` data source — read back rule attachments
+  on a SubVS (the resource exists, the data source does not)
+- `persist` mode field — the `persist` API key (values: `src`, `cookie`,
+  `ssl`, `sip`, `super`, etc.) is not returned by `showvs`; needs a live
+  investigation before implementing to confirm round-trip behaviour
+- Remaining VS/SubVS fields from `showvs`: `MultiConnect`, `PassSni`,
+  `PassCipher`, `ServerInit`, `Verify`, `ClientCert` (low priority)

@@ -152,6 +152,7 @@ func (p *KempProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		NewReplaceHeaderRuleDataSource,
 		NewModifyURLRuleDataSource,
 		NewReplaceBodyRuleDataSource,
+		NewSubVirtualServiceRuleDataSource,
 		NewVirtualServiceRuleDataSource,
 		NewVirtualServiceWafRuleDataSource,
 		NewOwaspCustomRuleDataSource,
