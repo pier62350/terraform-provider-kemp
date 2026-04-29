@@ -49,6 +49,17 @@ type VirtualServiceResourceModel struct {
 	PersistTimeout      types.String `tfsdk:"persist_timeout"`
 	Idletime            types.Int64  `tfsdk:"idletime"`
 	ForceL7             types.Bool   `tfsdk:"force_l7"`
+	ForceL4             types.Bool   `tfsdk:"force_l4"`
+	Transparent         types.Bool   `tfsdk:"transparent"`
+	UseForSnat          types.Bool   `tfsdk:"use_for_snat"`
+	Cache               types.Bool   `tfsdk:"cache"`
+	Compress            types.Bool   `tfsdk:"compress"`
+	AllowHTTP2          types.Bool   `tfsdk:"allow_http2"`
+	SSLReverse          types.Bool   `tfsdk:"ssl_reverse"`
+	SSLReencrypt        types.Bool   `tfsdk:"ssl_reencrypt"`
+	AddVia              types.String `tfsdk:"add_via"`
+	RefreshPersist      types.Bool   `tfsdk:"refresh_persist"`
+	RsMinimum           types.Int64  `tfsdk:"rs_minimum"`
 	Bandwidth           types.Int64  `tfsdk:"bandwidth"`
 	ConnsPerSecLimit    types.Int64  `tfsdk:"conns_per_sec_limit"`
 	RequestsPerSecLimit types.Int64  `tfsdk:"requests_per_sec_limit"`
@@ -154,6 +165,61 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 			},
 			"force_l7": schema.BoolAttribute{
 				MarkdownDescription: "Force Layer-7 processing even when the VS is configured as Layer-4.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"force_l4": schema.BoolAttribute{
+				MarkdownDescription: "Force Layer-4 processing (bypass Layer-7 inspection).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"transparent": schema.BoolAttribute{
+				MarkdownDescription: "Transparent mode — preserves the client IP address when forwarding to real servers.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"use_for_snat": schema.BoolAttribute{
+				MarkdownDescription: "Use this VS as the source NAT address for outbound connections.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"cache": schema.BoolAttribute{
+				MarkdownDescription: "Enable HTTP response caching on the LoadMaster for this VS.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"compress": schema.BoolAttribute{
+				MarkdownDescription: "Enable HTTP response compression (gzip) for this VS.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"allow_http2": schema.BoolAttribute{
+				MarkdownDescription: "Enable HTTP/2 support on this VS.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"ssl_reverse": schema.BoolAttribute{
+				MarkdownDescription: "Re-encrypt connections to real servers using SSL (SSL offload in reverse).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"ssl_reencrypt": schema.BoolAttribute{
+				MarkdownDescription: "Re-encrypt to real servers using the same SSL session parameters as the client.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"add_via": schema.StringAttribute{
+				MarkdownDescription: "Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"refresh_persist": schema.BoolAttribute{
+				MarkdownDescription: "Refresh the persistence entry on every request (not just the first).",
+				Optional:            true,
+				Computed:            true,
+			},
+			"rs_minimum": schema.Int64Attribute{
+				MarkdownDescription: "Minimum number of active real servers required before the VS is marked up. `0` means no minimum.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -339,6 +405,40 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	if !m.ForceL7.IsNull() && !m.ForceL7.IsUnknown() {
 		p.ForceL7 = boolPtr(m.ForceL7.ValueBool())
 	}
+	if !m.ForceL4.IsNull() && !m.ForceL4.IsUnknown() {
+		p.ForceL4 = boolPtr(m.ForceL4.ValueBool())
+	}
+	if !m.Transparent.IsNull() && !m.Transparent.IsUnknown() {
+		p.Transparent = boolPtr(m.Transparent.ValueBool())
+	}
+	if !m.UseForSnat.IsNull() && !m.UseForSnat.IsUnknown() {
+		p.UseforSnat = boolPtr(m.UseForSnat.ValueBool())
+	}
+	if !m.Cache.IsNull() && !m.Cache.IsUnknown() {
+		p.Cache = boolPtr(m.Cache.ValueBool())
+	}
+	if !m.Compress.IsNull() && !m.Compress.IsUnknown() {
+		p.Compress = boolPtr(m.Compress.ValueBool())
+	}
+	if !m.AllowHTTP2.IsNull() && !m.AllowHTTP2.IsUnknown() {
+		p.AllowHTTP2 = boolPtr(m.AllowHTTP2.ValueBool())
+	}
+	if !m.SSLReverse.IsNull() && !m.SSLReverse.IsUnknown() {
+		p.SSLReverse = boolPtr(m.SSLReverse.ValueBool())
+	}
+	if !m.SSLReencrypt.IsNull() && !m.SSLReencrypt.IsUnknown() {
+		p.SSLReencrypt = boolPtr(m.SSLReencrypt.ValueBool())
+	}
+	if !m.AddVia.IsNull() && !m.AddVia.IsUnknown() {
+		p.AddVia = addViaToAPI(m.AddVia.ValueString())
+	}
+	if !m.RefreshPersist.IsNull() && !m.RefreshPersist.IsUnknown() {
+		p.RefreshPersist = boolPtr(m.RefreshPersist.ValueBool())
+	}
+	if !m.RsMinimum.IsNull() && !m.RsMinimum.IsUnknown() {
+		v := int32(m.RsMinimum.ValueInt64())
+		p.RsMinimum = &v
+	}
 	if !m.CheckType.IsNull() && !m.CheckType.IsUnknown() {
 		p.CheckType = m.CheckType.ValueString()
 	}
@@ -464,6 +564,17 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.PersistTimeout = types.StringValue(vs.PersistTimeout)
 	m.Idletime = int64FromPtr(vs.Idletime)
 	m.ForceL7 = boolFromPtr(vs.ForceL7)
+	m.ForceL4 = boolFromPtr(vs.ForceL4)
+	m.Transparent = boolFromPtr(vs.Transparent)
+	m.UseForSnat = boolFromPtr(vs.UseforSnat)
+	m.Cache = boolFromPtr(vs.Cache)
+	m.Compress = boolFromPtr(vs.Compress)
+	m.AllowHTTP2 = boolFromPtr(vs.AllowHTTP2)
+	m.SSLReverse = boolFromPtr(vs.SSLReverse)
+	m.SSLReencrypt = boolFromPtr(vs.SSLReencrypt)
+	m.AddVia = types.StringValue(addViaFromAPI(vs.AddVia))
+	m.RefreshPersist = boolFromPtr(vs.RefreshPersist)
+	m.RsMinimum = int64FromPtr(vs.RsMinimum)
 	m.CheckType = types.StringValue(vs.CheckType)
 	m.CheckPort = types.StringValue(vs.CheckPort)
 	m.ChkInterval = int64FromPtr(vs.ChkInterval)

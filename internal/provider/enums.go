@@ -123,6 +123,36 @@ func espOutputAuthModeFromAPI(s string) string {
 	}
 }
 
+// addViaToAPI converts a friendly add_via value to the *int32 the API expects.
+// Values: "no" (0), "add" (1), "replace" (2).
+func addViaToAPI(s string) *int32 {
+	var v int32
+	switch s {
+	case "add":
+		v = 1
+	case "replace":
+		v = 2
+	default: // "no" or empty
+		v = 0
+	}
+	return &v
+}
+
+// addViaFromAPI converts the *int32 AddVia from the API to its friendly name.
+func addViaFromAPI(v *int32) string {
+	if v == nil {
+		return "no"
+	}
+	switch *v {
+	case 1:
+		return "add"
+	case 2:
+		return "replace"
+	default:
+		return "no"
+	}
+}
+
 // checkUseGetToAPI converts a friendly check_use_get value to the *int32 the
 // API expects. Unknown values default to HEAD (0).
 func checkUseGetToAPI(s string) *int32 {

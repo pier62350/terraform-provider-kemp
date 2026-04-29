@@ -45,6 +45,17 @@ type SubVirtualServiceResourceModel struct {
 	PersistTimeout      types.String `tfsdk:"persist_timeout"`
 	Idletime            types.Int64  `tfsdk:"idletime"`
 	ForceL7             types.Bool   `tfsdk:"force_l7"`
+	ForceL4             types.Bool   `tfsdk:"force_l4"`
+	Transparent         types.Bool   `tfsdk:"transparent"`
+	UseForSnat          types.Bool   `tfsdk:"use_for_snat"`
+	Cache               types.Bool   `tfsdk:"cache"`
+	Compress            types.Bool   `tfsdk:"compress"`
+	AllowHTTP2          types.Bool   `tfsdk:"allow_http2"`
+	SSLReverse          types.Bool   `tfsdk:"ssl_reverse"`
+	SSLReencrypt        types.Bool   `tfsdk:"ssl_reencrypt"`
+	AddVia              types.String `tfsdk:"add_via"`
+	RefreshPersist      types.Bool   `tfsdk:"refresh_persist"`
+	RsMinimum           types.Int64  `tfsdk:"rs_minimum"`
 	Bandwidth           types.Int64  `tfsdk:"bandwidth"`
 	ConnsPerSecLimit    types.Int64  `tfsdk:"conns_per_sec_limit"`
 	RequestsPerSecLimit types.Int64  `tfsdk:"requests_per_sec_limit"`
@@ -118,7 +129,18 @@ The SubVS exposes the same SSL + ESP + WAF surface as the parent ` + "`kemp_virt
 			"schedule":                schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Load-balancing algorithm: `rr`, `wlc`, `lc`, `pi`, `ph`, etc."},
 			"persist_timeout":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Persistence timeout in seconds. `0` disables persistence."},
 			"idletime":                schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Idle connection timeout in seconds."},
-			"force_l7":                schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Force Layer-7 processing."},
+			"force_l7":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Force Layer-7 processing."},
+			"force_l4":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Force Layer-4 processing (bypass Layer-7 inspection)."},
+			"transparent":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Transparent mode — preserves the client IP address when forwarding to real servers."},
+			"use_for_snat":   schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Use this SubVS as the source NAT address for outbound connections."},
+			"cache":          schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP response caching on the LoadMaster for this SubVS."},
+			"compress":       schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP response compression (gzip) for this SubVS."},
+			"allow_http2":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Enable HTTP/2 support on this SubVS."},
+			"ssl_reverse":    schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Re-encrypt connections to real servers using SSL."},
+			"ssl_reencrypt":  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Re-encrypt to real servers using the same SSL session parameters as the client."},
+			"add_via":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`."},
+			"refresh_persist": schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Refresh the persistence entry on every request (not just the first)."},
+			"rs_minimum":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Minimum number of active real servers required before the SubVS is marked up. `0` means no minimum."},
 			"bandwidth":               schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Bandwidth limit in Mbps. `0` means unlimited."},
 			"conns_per_sec_limit":     schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum new connections per second. `0` means unlimited."},
 			"requests_per_sec_limit":  schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: "Maximum HTTP requests per second. `0` means unlimited."},
@@ -192,6 +214,40 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 	}
 	if !m.ForceL7.IsNull() && !m.ForceL7.IsUnknown() {
 		p.ForceL7 = boolPtr(m.ForceL7.ValueBool())
+	}
+	if !m.ForceL4.IsNull() && !m.ForceL4.IsUnknown() {
+		p.ForceL4 = boolPtr(m.ForceL4.ValueBool())
+	}
+	if !m.Transparent.IsNull() && !m.Transparent.IsUnknown() {
+		p.Transparent = boolPtr(m.Transparent.ValueBool())
+	}
+	if !m.UseForSnat.IsNull() && !m.UseForSnat.IsUnknown() {
+		p.UseforSnat = boolPtr(m.UseForSnat.ValueBool())
+	}
+	if !m.Cache.IsNull() && !m.Cache.IsUnknown() {
+		p.Cache = boolPtr(m.Cache.ValueBool())
+	}
+	if !m.Compress.IsNull() && !m.Compress.IsUnknown() {
+		p.Compress = boolPtr(m.Compress.ValueBool())
+	}
+	if !m.AllowHTTP2.IsNull() && !m.AllowHTTP2.IsUnknown() {
+		p.AllowHTTP2 = boolPtr(m.AllowHTTP2.ValueBool())
+	}
+	if !m.SSLReverse.IsNull() && !m.SSLReverse.IsUnknown() {
+		p.SSLReverse = boolPtr(m.SSLReverse.ValueBool())
+	}
+	if !m.SSLReencrypt.IsNull() && !m.SSLReencrypt.IsUnknown() {
+		p.SSLReencrypt = boolPtr(m.SSLReencrypt.ValueBool())
+	}
+	if !m.AddVia.IsNull() && !m.AddVia.IsUnknown() {
+		p.AddVia = addViaToAPI(m.AddVia.ValueString())
+	}
+	if !m.RefreshPersist.IsNull() && !m.RefreshPersist.IsUnknown() {
+		p.RefreshPersist = boolPtr(m.RefreshPersist.ValueBool())
+	}
+	if !m.RsMinimum.IsNull() && !m.RsMinimum.IsUnknown() {
+		v := int32(m.RsMinimum.ValueInt64())
+		p.RsMinimum = &v
 	}
 	if !m.Bandwidth.IsNull() && !m.Bandwidth.IsUnknown() {
 		v := int32(m.Bandwidth.ValueInt64())
@@ -309,6 +365,17 @@ func (r *SubVirtualServiceResource) writeState(ctx context.Context, vs *loadmast
 	m.PersistTimeout = types.StringValue(vs.PersistTimeout)
 	m.Idletime = int64FromPtr(vs.Idletime)
 	m.ForceL7 = boolFromPtr(vs.ForceL7)
+	m.ForceL4 = boolFromPtr(vs.ForceL4)
+	m.Transparent = boolFromPtr(vs.Transparent)
+	m.UseForSnat = boolFromPtr(vs.UseforSnat)
+	m.Cache = boolFromPtr(vs.Cache)
+	m.Compress = boolFromPtr(vs.Compress)
+	m.AllowHTTP2 = boolFromPtr(vs.AllowHTTP2)
+	m.SSLReverse = boolFromPtr(vs.SSLReverse)
+	m.SSLReencrypt = boolFromPtr(vs.SSLReencrypt)
+	m.AddVia = types.StringValue(addViaFromAPI(vs.AddVia))
+	m.RefreshPersist = boolFromPtr(vs.RefreshPersist)
+	m.RsMinimum = int64FromPtr(vs.RsMinimum)
 	m.Bandwidth = int64FromPtr(vs.Bandwidth)
 	m.ConnsPerSecLimit = int64FromPtr(vs.ConnsPerSecLimit)
 	m.RequestsPerSecLimit = int64FromPtr(vs.RequestsPerSecLimit)

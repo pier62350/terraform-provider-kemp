@@ -24,6 +24,17 @@ type VirtualService struct {
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
+	ForceL4             *bool  `json:"ForceL4,omitempty"`
+	Transparent         *bool  `json:"Transparent,omitempty"`
+	UseforSnat          *bool  `json:"UseforSnat,omitempty"`
+	Cache               *bool  `json:"Cache,omitempty"`
+	Compress            *bool  `json:"Compress,omitempty"`
+	AllowHTTP2          *bool  `json:"AllowHTTP2,omitempty"`
+	SSLReverse          *bool  `json:"SSLReverse,omitempty"`
+	SSLReencrypt        *bool  `json:"SSLReencrypt,omitempty"`
+	AddVia              *int32 `json:"AddVia,omitempty"`
+	RefreshPersist      *bool  `json:"RefreshPersist,omitempty"`
+	RsMinimum           *int32 `json:"RsMinimum,omitempty"`
 	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
 	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
 	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`
@@ -72,6 +83,17 @@ type VirtualServiceParams struct {
 	PersistTimeout      string `json:"PersistTimeout,omitempty"`
 	Idletime            *int32 `json:"Idletime,omitempty"`
 	ForceL7             *bool  `json:"ForceL7,omitempty"`
+	ForceL4             *bool  `json:"ForceL4,omitempty"`
+	Transparent         *bool  `json:"Transparent,omitempty"`
+	UseforSnat          *bool  `json:"UseforSnat,omitempty"`
+	Cache               *bool  `json:"Cache,omitempty"`
+	Compress            *bool  `json:"Compress,omitempty"`
+	AllowHTTP2          *bool  `json:"AllowHTTP2,omitempty"`
+	SSLReverse          *bool  `json:"SSLReverse,omitempty"`
+	SSLReencrypt        *bool  `json:"SSLReencrypt,omitempty"`
+	AddVia              *int32 `json:"AddVia,omitempty"`
+	RefreshPersist      *bool  `json:"RefreshPersist,omitempty"`
+	RsMinimum           *int32 `json:"RsMinimum,omitempty"`
 	Bandwidth           *int32 `json:"Bandwidth,omitempty"`
 	ConnsPerSecLimit    *int32 `json:"ConnsPerSecLimit,omitempty"`
 	RequestsPerSecLimit *int32 `json:"RequestsPerSecLimit,omitempty"`

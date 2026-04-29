@@ -58,7 +58,10 @@ resource "kemp_sub_virtual_service" "static" {
 
 ### Optional
 
+- `add_via` (String) Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`.
+- `allow_http2` (Boolean) Enable HTTP/2 support on this SubVS.
 - `bandwidth` (Number) Bandwidth limit in Mbps. `0` means unlimited.
+- `cache` (Boolean) Enable HTTP response caching on the LoadMaster for this SubVS.
 - `cert_files` (List of String) Names of certificates attached to this SubVS (multiple entries enable SNI).
 - `check_port` (String) Port used for health checks. `0` means use the VS port.
 - `check_type` (String) Health check type: `tcp`, `http`, `https`, `icmp`, `none`, etc.
@@ -67,6 +70,7 @@ resource "kemp_sub_virtual_service" "static" {
 - `chk_interval` (Number) Interval between health checks in seconds.
 - `chk_retry_count` (Number) Consecutive failures before marking a real server down.
 - `chk_timeout` (Number) Health check timeout in seconds.
+- `compress` (Boolean) Enable HTTP response compression (gzip) for this SubVS.
 - `conns_per_sec_limit` (Number) Maximum new connections per second. `0` means unlimited.
 - `enabled` (Boolean)
 - `enhanced_health_checks` (Boolean) Enable enhanced health checks.
@@ -78,6 +82,7 @@ resource "kemp_sub_virtual_service" "static" {
 - `esp_input_auth_mode` (String) Client-side auth mode: `none`, `basic`, `form`.
 - `esp_logs` (Boolean)
 - `esp_output_auth_mode` (String) Server-side auth mode: `none`, `basic`, `form`, `kcd`.
+- `force_l4` (Boolean) Force Layer-4 processing (bypass Layer-7 inspection).
 - `force_l7` (Boolean) Force Layer-7 processing.
 - `idletime` (Number) Idle connection timeout in seconds.
 - `match_len` (Number) Bytes of health check response body to inspect for match pattern.
@@ -85,10 +90,16 @@ resource "kemp_sub_virtual_service" "static" {
 - `need_host_name` (Boolean) Send the VS hostname in the HTTP `Host` header during health checks.
 - `nickname` (String) Friendly name shown in the WUI.
 - `persist_timeout` (String) Persistence timeout in seconds. `0` disables persistence.
+- `refresh_persist` (Boolean) Refresh the persistence entry on every request (not just the first).
 - `requests_per_sec_limit` (Number) Maximum HTTP requests per second. `0` means unlimited.
+- `rs_minimum` (Number) Minimum number of active real servers required before the SubVS is marked up. `0` means no minimum.
 - `schedule` (String) Load-balancing algorithm: `rr`, `wlc`, `lc`, `pi`, `ph`, etc.
 - `ssl_acceleration` (Boolean) Enable SSL/TLS termination on this SubVS.
+- `ssl_reencrypt` (Boolean) Re-encrypt to real servers using the same SSL session parameters as the client.
+- `ssl_reverse` (Boolean) Re-encrypt connections to real servers using SSL.
+- `transparent` (Boolean) Transparent mode — preserves the client IP address when forwarding to real servers.
 - `type` (String) VS type — `gen`, `http`, `http2`, `ts`, `tls`, `log`.
+- `use_for_snat` (Boolean) Use this SubVS as the source NAT address for outbound connections.
 - `waf_alert_threshold` (Number)
 - `waf_blocking_paranoia` (Number)
 - `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy`, or `owasp`.

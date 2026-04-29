@@ -34,7 +34,10 @@ resource "kemp_virtual_service" "example" {
 
 ### Optional
 
+- `add_via` (String) Whether to add a `Via` header to proxied requests: `no`, `add`, or `replace`.
+- `allow_http2` (Boolean) Enable HTTP/2 support on this VS.
 - `bandwidth` (Number) Bandwidth limit in Mbps. `0` means unlimited.
+- `cache` (Boolean) Enable HTTP response caching on the LoadMaster for this VS.
 - `cert_files` (List of String) Names of certificates (as stored on the LoadMaster) attached to this virtual service. Multiple entries enable SNI: LoadMaster picks the cert whose subject matches the client's TLS SNI hostname. Order matters — the first cert is the default.
 - `check_port` (String) Port used for health checks. `0` means use the VS port.
 - `check_type` (String) Health check type: `tcp`, `http`, `https`, `icmp`, `smtp`, `nntp`, `ftp`, `dns`, `pop3`, `imap`, `rdp`, `snmp`, `ldap`, `none`, etc.
@@ -43,6 +46,7 @@ resource "kemp_virtual_service" "example" {
 - `chk_interval` (Number) Interval between health checks in seconds.
 - `chk_retry_count` (Number) Number of consecutive failed health checks before a real server is marked down.
 - `chk_timeout` (Number) Health check timeout in seconds.
+- `compress` (Boolean) Enable HTTP response compression (gzip) for this VS.
 - `conns_per_sec_limit` (Number) Maximum new connections per second. `0` means unlimited.
 - `enabled` (Boolean) Whether the virtual service is enabled.
 - `enhanced_health_checks` (Boolean) Enable enhanced health checks (sends a more complete HTTP request).
@@ -54,6 +58,7 @@ resource "kemp_virtual_service" "example" {
 - `esp_input_auth_mode` (String) Client-side authentication mode. Known values: `none`, `basic`, `form`. Other numeric values from LoadMaster docs are also accepted.
 - `esp_logs` (Boolean) Enable extended ESP logging for this VS.
 - `esp_output_auth_mode` (String) Server-side authentication mode for the upstream. Known values: `none`, `basic`, `form`, `kcd` (Kerberos Constrained Delegation). Other numeric values from LoadMaster docs are also accepted.
+- `force_l4` (Boolean) Force Layer-4 processing (bypass Layer-7 inspection).
 - `force_l7` (Boolean) Force Layer-7 processing even when the VS is configured as Layer-4.
 - `idletime` (Number) Idle connection timeout in seconds. Default is 660.
 - `match_len` (Number) Number of bytes of the health check response body to inspect for the match pattern.
@@ -61,10 +66,16 @@ resource "kemp_virtual_service" "example" {
 - `need_host_name` (Boolean) Send the VS hostname in the HTTP `Host` header during health checks.
 - `nickname` (String) Friendly name for the virtual service.
 - `persist_timeout` (String) Persistence timeout in seconds. `0` disables persistence.
+- `refresh_persist` (Boolean) Refresh the persistence entry on every request (not just the first).
 - `requests_per_sec_limit` (Number) Maximum HTTP requests per second. `0` means unlimited.
+- `rs_minimum` (Number) Minimum number of active real servers required before the VS is marked up. `0` means no minimum.
 - `schedule` (String) Load-balancing algorithm: `rr` (round-robin), `wlc` (weighted least-connections), `lc` (least-connections), `pi` (proximity IP), `ph` (persistent hash), etc.
 - `ssl_acceleration` (Boolean) Enable SSL/TLS termination on the LoadMaster (a.k.a. SSL acceleration). Requires `cert_files` to be set.
+- `ssl_reencrypt` (Boolean) Re-encrypt to real servers using the same SSL session parameters as the client.
+- `ssl_reverse` (Boolean) Re-encrypt connections to real servers using SSL (SSL offload in reverse).
+- `transparent` (Boolean) Transparent mode — preserves the client IP address when forwarding to real servers.
 - `type` (String) VS type — one of `gen`, `http`, `http2`, `ts`, `tls`, `log`.
+- `use_for_snat` (Boolean) Use this VS as the source NAT address for outbound connections.
 - `waf_alert_threshold` (Number) Anomaly score that triggers blocking. Set to 0 for detection-only (audit) mode.
 - `waf_blocking_paranoia` (Number) OWASP paranoia level (0-4). Higher = more rules trigger, more false positives.
 - `waf_intercept_mode` (String) WAF intercept mode: `disabled`, `legacy` (Legacy WAF), or `owasp` (OWASP WAF).
