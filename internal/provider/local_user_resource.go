@@ -36,7 +36,7 @@ type LocalUserResourceModel struct {
 }
 
 func (r *LocalUserResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_local_user"
+	resp.TypeName = req.ProviderTypeName + "_config_local_user"
 }
 
 func (r *LocalUserResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {

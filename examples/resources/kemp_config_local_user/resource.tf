@@ -1,4 +1,4 @@
-resource "kemp_local_user" "ops" {
+resource "kemp_config_local_user" "ops" {
   username = "ops01"
   password = var.ops_password
 
@@ -6,7 +6,7 @@ resource "kemp_local_user" "ops" {
 }
 
 # Read-only user (no permissions)
-resource "kemp_local_user" "readonly" {
+resource "kemp_config_local_user" "readonly" {
   username = "monitor01"
   password = var.monitor_password
 }

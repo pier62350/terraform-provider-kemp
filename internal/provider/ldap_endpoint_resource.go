@@ -66,7 +66,7 @@ func ldapTypeAPIToFriendly(apiVal string) string {
 }
 
 func (r *LDAPEndpointResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ldap_endpoint"
+	resp.TypeName = req.ProviderTypeName + "_config_ldap_endpoint"
 }
 
 func (r *LDAPEndpointResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {

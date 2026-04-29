@@ -33,7 +33,7 @@ type HostsEntryResourceModel struct {
 }
 
 func (r *HostsEntryResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_hosts_entry"
+	resp.TypeName = req.ProviderTypeName + "_config_hosts_entry"
 }
 
 func (r *HostsEntryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {

@@ -34,7 +34,7 @@ type InterfaceDataSourceModel struct {
 }
 
 func (d *InterfaceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_interface"
+	resp.TypeName = req.ProviderTypeName + "_config_interface"
 }
 
 func (d *InterfaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {

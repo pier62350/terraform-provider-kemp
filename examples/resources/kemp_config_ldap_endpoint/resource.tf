@@ -1,4 +1,4 @@
-resource "kemp_ldap_endpoint" "corp" {
+resource "kemp_config_ldap_endpoint" "corp" {
   name      = "CORP_LDAP"
   ldap_type = "starttls"
   server    = "ldap1.corp.example.com ldap2.corp.example.com"
