@@ -30,7 +30,8 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-// Example acceptance test — creates a fresh virtual service at 10.0.0.100.
+// TestAccVirtualServiceResource_basic creates a fresh VS at 10.0.0.100,
+// verifies the initial state, updates the nickname, and verifies import.
 // Acceptance tests must NOT collide with any pre-existing virtual services
 // on the LoadMaster they target.
 func TestAccVirtualServiceResource_basic(t *testing.T) {
@@ -56,6 +57,30 @@ resource "kemp_virtual_service" "test" {
 					resource.TestCheckResourceAttr("kemp_virtual_service.test", "nickname", "tf-acc-test"),
 					resource.TestCheckResourceAttrSet("kemp_virtual_service.test", "id"),
 				),
+			},
+			// Update nickname in-place
+			{
+				Config: `
+resource "kemp_virtual_service" "test" {
+  address  = "10.0.0.100"
+  port     = "8080"
+  protocol = "tcp"
+  type     = "http"
+  nickname = "tf-acc-test-updated"
+  enabled  = true
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("kemp_virtual_service.test", "nickname", "tf-acc-test-updated"),
+				),
+			},
+			// Import by VS Index
+			{
+				ResourceName:      "kemp_virtual_service.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// persist is write-only; not returned by showvs
+				ImportStateVerifyIgnore: []string{"persist"},
 			},
 		},
 	})
