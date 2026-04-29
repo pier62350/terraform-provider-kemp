@@ -135,6 +135,11 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewACMEAccountResource,
 		NewACMECertificateRenewalResource,
 		NewCipherSetResource,
+		NewRouteResource,
+		NewHostsEntryResource,
+		NewLocalUserResource,
+		NewLDAPEndpointResource,
+		NewGlobalHealthCheckResource,
 	}
 }
 
@@ -161,6 +166,7 @@ func (p *KempProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		NewWafCustomRuleDataSource,
 		NewWafCustomDataDataSource,
 		NewCipherSetDataSource,
+		NewInterfaceDataSource,
 	}
 }
 
