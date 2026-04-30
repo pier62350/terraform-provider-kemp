@@ -1,0 +1,1 @@
+terraform import kemp_config_user_certificate.admin admin

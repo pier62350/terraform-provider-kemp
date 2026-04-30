@@ -141,6 +141,8 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewLDAPEndpointResource,
 		NewGlobalHealthCheckResource,
 		NewSSODomainResource,
+		NewGroupResource,
+		NewUserCertResource,
 	}
 }
 

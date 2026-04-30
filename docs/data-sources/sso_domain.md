@@ -3,7 +3,7 @@
 page_title: "kemp_sso_domain Data Source - kemp"
 subcategory: "Single Sign-On"
 description: |-
-    Reads an existing Kemp LoadMaster SSO authentication domain by name.
+  Reads an existing Kemp LoadMaster SSO authentication domain by name.
 ---
 
 # kemp_sso_domain (Data Source)

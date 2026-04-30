@@ -3,7 +3,7 @@
 page_title: "kemp_sso_domain Resource - kemp"
 subcategory: "Single Sign-On"
 description: |-
-    Manages a Kemp LoadMaster SSO (Edge Security Pack) authentication domain.
+  Manages a Kemp LoadMaster SSO (Edge Security Pack) authentication domain.
   An SSO domain defines how the LoadMaster authenticates users before forwarding requests to real servers. Supported authentication protocols: LDAP (Unencrypted / StartTLS / LDAPS), RADIUS, RSA SecurID, KCD (Kerberos Constrained Delegation), Certificates, SAML, and OIDC/OAuth.
   Once created, reference the domain name in kemp_virtual_service or kemp_sub_virtual_service via esp_sso_domain (client-side) or esp_sso_out_domain (server-side KCD).
 ---
@@ -153,11 +153,3 @@ resource "kemp_virtual_service" "app" {
 ### Read-Only
 
 - `id` (String) Domain name (same as `name`). Used as the Terraform resource ID.
-
-## Import
-
-SSO domains are imported using the domain name:
-
-```shell
-terraform import kemp_sso_domain.example corp.example.com
-```
