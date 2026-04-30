@@ -55,6 +55,8 @@ output "nickname" {
 - `esp_input_auth_mode` (String)
 - `esp_logs` (Boolean)
 - `esp_output_auth_mode` (String)
+- `esp_sso_domain` (String)
+- `esp_sso_out_domain` (String)
 - `force_l7` (Boolean)
 - `idletime` (Number)
 - `match_len` (Number)

@@ -95,6 +95,8 @@ type VirtualServiceResourceModel struct {
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
 	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
 	EspAllowedDirectories  types.String `tfsdk:"esp_allowed_directories"`
+	EspSsoDomain           types.String `tfsdk:"esp_sso_domain"`
+	EspSsoOutDomain        types.String `tfsdk:"esp_sso_out_domain"`
 	EspInputAuthMode       types.String `tfsdk:"esp_input_auth_mode"`
 	EspOutputAuthMode      types.String `tfsdk:"esp_output_auth_mode"`
 	EspIncludeNestedGroups types.Bool   `tfsdk:"esp_include_nested_groups"`
@@ -408,13 +410,23 @@ func (r *VirtualServiceResource) Schema(_ context.Context, _ resource.SchemaRequ
 				Optional:            true,
 				Computed:            true,
 			},
+			"esp_sso_domain": schema.StringAttribute{
+				MarkdownDescription: "Optional. Name of the SSO domain (managed by `kemp_sso_domain`) this VS will use for client-side authentication. Requires `esp_enabled = true`.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"esp_sso_out_domain": schema.StringAttribute{
+				MarkdownDescription: "Optional. Name of the outbound SSO domain used for server-side (outbound KCD) authentication. Only relevant when `esp_output_auth_mode = \"kcd\"`.",
+				Optional:            true,
+				Computed:            true,
+			},
 			"esp_input_auth_mode": schema.StringAttribute{
-				MarkdownDescription: "Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.",
+				MarkdownDescription: "Optional. Client-side authentication mode: `delegate_to_server` (default), `basic`, `form`, `client_cert`, `ntlm`, `saml`, `pass_post`, `oidc`.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"esp_output_auth_mode": schema.StringAttribute{
-				MarkdownDescription: "Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).",
+				MarkdownDescription: "Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, `kcd` (Kerberos Constrained Delegation), `server_token`.",
 				Optional:            true,
 				Computed:            true,
 			},
@@ -732,6 +744,12 @@ func (r *VirtualServiceResource) paramsFromModel(ctx context.Context, m VirtualS
 	if !m.EspAllowedDirectories.IsNull() && !m.EspAllowedDirectories.IsUnknown() {
 		p.AllowedDirectories = m.EspAllowedDirectories.ValueString()
 	}
+	if !m.EspSsoDomain.IsNull() && !m.EspSsoDomain.IsUnknown() {
+		p.Domain = m.EspSsoDomain.ValueString()
+	}
+	if !m.EspSsoOutDomain.IsNull() && !m.EspSsoOutDomain.IsUnknown() {
+		p.OutConf = m.EspSsoOutDomain.ValueString()
+	}
 	if !m.EspInputAuthMode.IsNull() && !m.EspInputAuthMode.IsUnknown() {
 		p.InputAuthMode = espInputAuthModeToAPI(m.EspInputAuthMode.ValueString())
 	}
@@ -883,6 +901,8 @@ func (r *VirtualServiceResource) writeState(ctx context.Context, vs *loadmaster.
 	m.EspEnabled = boolFromPtr(vs.EspEnabled)
 	m.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
 	m.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
+	m.EspSsoDomain = types.StringValue(vs.Domain)
+	m.EspSsoOutDomain = types.StringValue(vs.OutConf)
 	m.EspInputAuthMode = types.StringValue(espInputAuthModeFromAPI(vs.InputAuthMode))
 	m.EspOutputAuthMode = types.StringValue(espOutputAuthModeFromAPI(vs.OutputAuthMode))
 	m.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)

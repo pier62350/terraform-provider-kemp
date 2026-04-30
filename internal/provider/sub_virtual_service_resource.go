@@ -84,6 +84,8 @@ type SubVirtualServiceResourceModel struct {
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
 	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
 	EspAllowedDirectories  types.String `tfsdk:"esp_allowed_directories"`
+	EspSsoDomain           types.String `tfsdk:"esp_sso_domain"`
+	EspSsoOutDomain        types.String `tfsdk:"esp_sso_out_domain"`
 	EspInputAuthMode       types.String `tfsdk:"esp_input_auth_mode"`
 	EspOutputAuthMode      types.String `tfsdk:"esp_output_auth_mode"`
 	EspIncludeNestedGroups types.Bool   `tfsdk:"esp_include_nested_groups"`
@@ -172,8 +174,10 @@ The SubVS exposes the same SSL + ESP + WAF surface as the parent ` + "`kemp_virt
 			"esp_enabled":               schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable Kemp Edge Security Pack (ESP) on this SubVS. Default: `false`."},
 			"esp_allowed_hosts":         schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Newline-separated list of hostnames the SubVS will accept for ESP. Empty string matches all hosts."},
 			"esp_allowed_directories":   schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Newline-separated list of URI prefixes allowed through ESP. Empty string allows all paths."},
-			"esp_input_auth_mode":       schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Client-side authentication mode: `none` (default), `basic`, or `form`."},
-			"esp_output_auth_mode":      schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation)."},
+			"esp_sso_domain":            schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Name of the SSO domain (`kemp_sso_domain`) this SubVS uses for client-side authentication. Requires `esp_enabled = true`."},
+			"esp_sso_out_domain":        schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Name of the outbound SSO domain for server-side KCD authentication."},
+			"esp_input_auth_mode":       schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Client-side authentication mode: `delegate_to_server` (default), `basic`, `form`, `client_cert`, `ntlm`, `saml`, `pass_post`, `oidc`."},
+			"esp_output_auth_mode":      schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, `kcd` (Kerberos Constrained Delegation), `server_token`."},
 			"esp_include_nested_groups": schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`."},
 			"esp_display_pub_priv":      schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Display the public/private session toggle on the ESP login form. Default: `false`."},
 			"esp_logs":                  schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: "Optional. Enable extended ESP logging for this SubVS. Default: `false`."},
@@ -346,6 +350,12 @@ func (r *SubVirtualServiceResource) paramsFromModel(ctx context.Context, m SubVi
 	if !m.EspAllowedDirectories.IsNull() && !m.EspAllowedDirectories.IsUnknown() {
 		p.AllowedDirectories = m.EspAllowedDirectories.ValueString()
 	}
+	if !m.EspSsoDomain.IsNull() && !m.EspSsoDomain.IsUnknown() {
+		p.Domain = m.EspSsoDomain.ValueString()
+	}
+	if !m.EspSsoOutDomain.IsNull() && !m.EspSsoOutDomain.IsUnknown() {
+		p.OutConf = m.EspSsoOutDomain.ValueString()
+	}
 	if !m.EspInputAuthMode.IsNull() && !m.EspInputAuthMode.IsUnknown() {
 		p.InputAuthMode = espInputAuthModeToAPI(m.EspInputAuthMode.ValueString())
 	}
@@ -441,6 +451,8 @@ func (r *SubVirtualServiceResource) writeState(ctx context.Context, vs *loadmast
 	m.EspEnabled = boolFromPtr(vs.EspEnabled)
 	m.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
 	m.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
+	m.EspSsoDomain = types.StringValue(vs.Domain)
+	m.EspSsoOutDomain = types.StringValue(vs.OutConf)
 	m.EspInputAuthMode = types.StringValue(espInputAuthModeFromAPI(vs.InputAuthMode))
 	m.EspOutputAuthMode = types.StringValue(espOutputAuthModeFromAPI(vs.OutputAuthMode))
 	m.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)

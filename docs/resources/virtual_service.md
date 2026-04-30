@@ -58,9 +58,11 @@ resource "kemp_virtual_service" "example" {
 - `esp_display_pub_priv` (Boolean) Optional. Display the public/private session toggle on the ESP login form. Default: `false`.
 - `esp_enabled` (Boolean) Optional. Enable Kemp Edge Security Pack (ESP) on this VS — pre-auth, SSO, header injection, etc. Requires `type = http` and typically `ssl_acceleration = true`. Default: `false`.
 - `esp_include_nested_groups` (Boolean) Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`.
-- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.
+- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `delegate_to_server` (default), `basic`, `form`, `client_cert`, `ntlm`, `saml`, `pass_post`, `oidc`.
 - `esp_logs` (Boolean) Optional. Enable extended ESP logging for this VS. Default: `false`.
-- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).
+- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, `kcd` (Kerberos Constrained Delegation), `server_token`.
+- `esp_sso_domain` (String) Optional. Name of the SSO domain (managed by `kemp_sso_domain`) this VS will use for client-side authentication. Requires `esp_enabled = true`.
+- `esp_sso_out_domain` (String) Optional. Name of the outbound SSO domain used for server-side (outbound KCD) authentication. Only relevant when `esp_output_auth_mode = "kcd"`.
 - `follow_vs_id` (Number) Optional. Index of another VS whose health state this VS mirrors. `0` = disabled (independent health). Default: `0`.
 - `force_l4` (Boolean) Optional. Force Layer-4 processing, bypassing Layer-7 inspection. Default: `false`.
 - `force_l7` (Boolean) Optional. Force Layer-7 processing even when the VS is configured as Layer-4. Default: `true` for `http`/`http2` types.

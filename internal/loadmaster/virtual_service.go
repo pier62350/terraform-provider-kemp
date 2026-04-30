@@ -65,6 +65,8 @@ type VirtualService struct {
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
 	AllowedHosts        string `json:"AllowedHosts,omitempty"`
 	AllowedDirectories  string `json:"AllowedDirectories,omitempty"`
+	Domain              string `json:"Domain,omitempty"`
+	OutConf             string `json:"OutConf,omitempty"`
 	InputAuthMode       string `json:"InputAuthMode,omitempty"`
 	OutputAuthMode      string `json:"OutputAuthMode,omitempty"`
 	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`
@@ -149,6 +151,8 @@ type VirtualServiceParams struct {
 	EspEnabled          *bool  `json:"EspEnabled,omitempty"`
 	AllowedHosts        string `json:"AllowedHosts,omitempty"`
 	AllowedDirectories  string `json:"AllowedDirectories,omitempty"`
+	Domain              string `json:"Domain,omitempty"`
+	OutConf             string `json:"OutConf,omitempty"`
 	InputAuthMode       string `json:"InputAuthMode,omitempty"`
 	OutputAuthMode      string `json:"OutputAuthMode,omitempty"`
 	IncludeNestedGroups *bool  `json:"IncludeNestedGroups,omitempty"`

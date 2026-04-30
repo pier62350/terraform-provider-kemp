@@ -60,15 +60,26 @@ func wafInterceptModeFromAPI(s string) string {
 }
 
 // espInputAuthModeToAPI converts a friendly esp_input_auth_mode value to its
-// numeric API string. Known values: "none", "basic", "form".
+// numeric API string.
+// 0=delegate_to_server 1=basic 2=form 4=client_cert 5=ntlm 6=saml 7=pass_post 8=oidc
 func espInputAuthModeToAPI(s string) string {
 	switch s {
-	case "none":
+	case "delegate_to_server", "none":
 		return "0"
 	case "basic":
 		return "1"
 	case "form":
 		return "2"
+	case "client_cert":
+		return "4"
+	case "ntlm":
+		return "5"
+	case "saml":
+		return "6"
+	case "pass_post":
+		return "7"
+	case "oidc":
+		return "8"
 	default:
 		return s
 	}
@@ -79,18 +90,29 @@ func espInputAuthModeToAPI(s string) string {
 func espInputAuthModeFromAPI(s string) string {
 	switch s {
 	case "0":
-		return "none"
+		return "delegate_to_server"
 	case "1":
 		return "basic"
 	case "2":
 		return "form"
+	case "4":
+		return "client_cert"
+	case "5":
+		return "ntlm"
+	case "6":
+		return "saml"
+	case "7":
+		return "pass_post"
+	case "8":
+		return "oidc"
 	default:
 		return s
 	}
 }
 
 // espOutputAuthModeToAPI converts a friendly esp_output_auth_mode value to its
-// numeric API string. Known values: "none", "basic", "form", "kcd".
+// numeric API string.
+// 0=none 1=basic 2=form 3=kcd 4=server_token
 func espOutputAuthModeToAPI(s string) string {
 	switch s {
 	case "none":
@@ -100,6 +122,8 @@ func espOutputAuthModeToAPI(s string) string {
 	case "form":
 		return "2"
 	case "kcd":
+		return "3"
+	case "server_token":
 		return "4"
 	default:
 		return s
@@ -116,8 +140,10 @@ func espOutputAuthModeFromAPI(s string) string {
 		return "basic"
 	case "2":
 		return "form"
-	case "4":
+	case "3":
 		return "kcd"
+	case "4":
+		return "server_token"
 	default:
 		return s
 	}

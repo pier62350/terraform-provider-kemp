@@ -80,9 +80,11 @@ resource "kemp_sub_virtual_service" "static" {
 - `esp_display_pub_priv` (Boolean) Optional. Display the public/private session toggle on the ESP login form. Default: `false`.
 - `esp_enabled` (Boolean) Optional. Enable Kemp Edge Security Pack (ESP) on this SubVS. Default: `false`.
 - `esp_include_nested_groups` (Boolean) Optional. Follow nested AD group memberships when ESP authorizes users. Default: `false`.
-- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `none` (default), `basic`, or `form`.
+- `esp_input_auth_mode` (String) Optional. Client-side authentication mode: `delegate_to_server` (default), `basic`, `form`, `client_cert`, `ntlm`, `saml`, `pass_post`, `oidc`.
 - `esp_logs` (Boolean) Optional. Enable extended ESP logging for this SubVS. Default: `false`.
-- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, or `kcd` (Kerberos Constrained Delegation).
+- `esp_output_auth_mode` (String) Optional. Server-side (upstream) authentication mode: `none` (default), `basic`, `form`, `kcd` (Kerberos Constrained Delegation), `server_token`.
+- `esp_sso_domain` (String) Optional. Name of the SSO domain (`kemp_sso_domain`) this SubVS uses for client-side authentication. Requires `esp_enabled = true`.
+- `esp_sso_out_domain` (String) Optional. Name of the outbound SSO domain for server-side KCD authentication.
 - `force_l4` (Boolean) Optional. Force Layer-4 processing (bypass Layer-7 inspection). Default: `false`.
 - `force_l7` (Boolean) Optional. Force Layer-7 processing. Default: `true` for `http`/`http2` types.
 - `idletime` (Number) Optional. Idle connection timeout in seconds. Default: `660`.

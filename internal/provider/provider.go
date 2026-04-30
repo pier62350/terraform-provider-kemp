@@ -140,6 +140,7 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewLocalUserResource,
 		NewLDAPEndpointResource,
 		NewGlobalHealthCheckResource,
+		NewSSODomainResource,
 	}
 }
 
@@ -167,6 +168,7 @@ func (p *KempProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		NewWafCustomDataDataSource,
 		NewCipherSetDataSource,
 		NewInterfaceDataSource,
+		NewSSODomainDataSource,
 	}
 }
 

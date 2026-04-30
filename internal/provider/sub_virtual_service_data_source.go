@@ -59,6 +59,8 @@ type SubVirtualServiceDataSourceModel struct {
 	EspEnabled             types.Bool   `tfsdk:"esp_enabled"`
 	EspAllowedHosts        types.String `tfsdk:"esp_allowed_hosts"`
 	EspAllowedDirectories  types.String `tfsdk:"esp_allowed_directories"`
+	EspSsoDomain           types.String `tfsdk:"esp_sso_domain"`
+	EspSsoOutDomain        types.String `tfsdk:"esp_sso_out_domain"`
 	EspInputAuthMode       types.String `tfsdk:"esp_input_auth_mode"`
 	EspOutputAuthMode      types.String `tfsdk:"esp_output_auth_mode"`
 	EspIncludeNestedGroups types.Bool   `tfsdk:"esp_include_nested_groups"`
@@ -106,6 +108,8 @@ func (d *SubVirtualServiceDataSource) Schema(_ context.Context, _ datasource.Sch
 			"esp_enabled":               schema.BoolAttribute{Computed: true},
 			"esp_allowed_hosts":         schema.StringAttribute{Computed: true},
 			"esp_allowed_directories":   schema.StringAttribute{Computed: true},
+			"esp_sso_domain":            schema.StringAttribute{Computed: true},
+			"esp_sso_out_domain":        schema.StringAttribute{Computed: true},
 			"esp_input_auth_mode":       schema.StringAttribute{Computed: true},
 			"esp_output_auth_mode":      schema.StringAttribute{Computed: true},
 			"esp_include_nested_groups": schema.BoolAttribute{Computed: true},
@@ -187,6 +191,8 @@ func (d *SubVirtualServiceDataSource) Read(ctx context.Context, req datasource.R
 	data.EspEnabled = boolFromPtr(vs.EspEnabled)
 	data.EspAllowedHosts = types.StringValue(vs.AllowedHosts)
 	data.EspAllowedDirectories = types.StringValue(vs.AllowedDirectories)
+	data.EspSsoDomain = types.StringValue(vs.Domain)
+	data.EspSsoOutDomain = types.StringValue(vs.OutConf)
 	data.EspInputAuthMode = types.StringValue(espInputAuthModeFromAPI(vs.InputAuthMode))
 	data.EspOutputAuthMode = types.StringValue(espOutputAuthModeFromAPI(vs.OutputAuthMode))
 	data.EspIncludeNestedGroups = boolFromPtr(vs.IncludeNestedGroups)
