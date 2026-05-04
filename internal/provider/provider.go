@@ -161,10 +161,20 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewConfigInterfaceVXLANResource,
 		NewConfigInterfaceAddressResource,
 		NewConfigInterfaceBondResource,
+		NewConfigCacheExtensionResource,
+		NewConfigCompressionExtensionResource,
+		NewConfigNetworkTelemetryResource,
+		NewConfigGEOResource,
+		NewConfigWAFUpdateResource,
+		NewConfigWAFLoggingResource,
+		NewConfigKubernetesResource,
 		// GEO / GSLB
 		NewGSLBClusterResource,
 		NewGSLBLocationResource,
 		NewGSLBFQDNResource,
+		NewGSLBParamsResource,
+		NewGSLBIPRangeResource,
+		NewGSLBACLEntryResource,
 	}
 }
 

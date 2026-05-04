@@ -95,14 +95,24 @@ Global settings not tied to a specific VS or RS. All use the `kemp_config_` pref
 | `kemp_config_interface_vxlan` | ✅ | VXLAN tunnel (supports update); import by interface_id |
 | `kemp_config_interface_address` | ✅ | Additional IP address on an interface; import `<interface_id>/<address>` |
 | `kemp_config_interface_bond` | ✅ | Bonded (LAG) interface with member management; import by interface_id |
+| `kemp_config_cache_extension` | ✅ | Per-extension cache bypass; import by extension string |
+| `kemp_config_compression_extension` | ✅ | Per-extension compression bypass; import by extension string |
+| `kemp_config_network_telemetry` | ✅ | Network telemetry enable/disable per interface; import by interface |
+| `kemp_config_geo` | ✅ | Enable/disable GEO load balancing globally; singleton, import `loadmaster` |
+| `kemp_config_waf_update` | ✅ | WAF auto-update and install schedule; singleton, import `loadmaster` |
+| `kemp_config_waf_logging` | ✅ | WAF remote logging (URI, credentials, format); singleton, import `loadmaster` |
+| `kemp_config_kubernetes` | ✅ | Kubernetes ingress integration (mode, namespace, watch timeout); singleton, import `loadmaster` |
 
 ### GEO / Global Server Load Balancing (`kemp_gslb_*`)
 
 | Resource / Data Source | Status | Notes |
 |---|---|---|
-| `kemp_gslb_fqdn` | 📋 planned | FQDN with IP members and location weights |
-| `kemp_gslb_cluster` | 📋 planned | GEO cluster (remote LoadMaster pool) |
-| `kemp_gslb_location` | 📋 planned | Custom geographic location for IP range selection |
+| `kemp_gslb_cluster` | ✅ | GEO cluster (remote LoadMaster pool) |
+| `kemp_gslb_location` | ✅ | Custom geographic location for IP range selection |
+| `kemp_gslb_fqdn` | ✅ | FQDN with IP members and location weights |
+| `kemp_gslb_params` | ✅ | DNS zone / SOA parameters for GSLB; singleton, import `loadmaster` |
+| `kemp_gslb_ip_range` | ✅ | IP range to location mapping; import `<start_ip>/<end_ip>` |
+| `kemp_gslb_acl_entry` | ✅ | GEO ACL custom entry (allow/block by CIDR); import `<type>/<cidr>` |
 
 **Every resource implements `ImportState`.** Match the pattern of an existing
 resource when adding new ones.

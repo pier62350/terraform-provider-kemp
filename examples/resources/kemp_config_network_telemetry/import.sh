@@ -1,0 +1,1 @@
+terraform import kemp_config_network_telemetry.eth1 1
