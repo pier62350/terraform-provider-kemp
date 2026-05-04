@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -51,8 +50,7 @@ func (r *ConfigCPSLimitResource) Schema(_ context.Context, _ resource.SchemaRequ
 			},
 			"limit": schema.Int64Attribute{
 				Required:            true,
-				MarkdownDescription: "**Required.** Maximum new connections per second allowed from this address. Forces replacement if changed.",
-				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
+				MarkdownDescription: "**Required.** Maximum new connections per second allowed from this address.",
 			},
 		},
 	}
@@ -108,8 +106,22 @@ func (r *ConfigCPSLimitResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *ConfigCPSLimitResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
-	// All attributes are ForceNew — no in-place update path.
+func (r *ConfigCPSLimitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state, plan ConfigCPSLimitModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if err := r.client.DeleteCPSLimit(ctx, state.Address.ValueString()); err != nil && !loadmaster.IsNotFound(err) {
+		resp.Diagnostics.AddError("Error updating CPS limit", err.Error())
+		return
+	}
+	if err := r.client.AddCPSLimit(ctx, plan.Address.ValueString(), strconv.FormatInt(plan.Limit.ValueInt64(), 10)); err != nil {
+		resp.Diagnostics.AddError("Error updating CPS limit", err.Error())
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *ConfigCPSLimitResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

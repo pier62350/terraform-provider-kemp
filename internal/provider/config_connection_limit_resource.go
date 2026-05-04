@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -51,8 +50,7 @@ func (r *ConfigConnectionLimitResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"limit": schema.Int64Attribute{
 				Required:            true,
-				MarkdownDescription: "**Required.** Maximum concurrent connections allowed from this address. Forces replacement if changed.",
-				PlanModifiers:       []planmodifier.Int64{int64planmodifier.RequiresReplace()},
+				MarkdownDescription: "**Required.** Maximum concurrent connections allowed from this address.",
 			},
 		},
 	}
@@ -108,8 +106,22 @@ func (r *ConfigConnectionLimitResource) Read(ctx context.Context, req resource.R
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *ConfigConnectionLimitResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
-	// All attributes are ForceNew — no in-place update path.
+func (r *ConfigConnectionLimitResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state, plan ConfigConnectionLimitModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if err := r.client.DeleteConnectionLimit(ctx, state.Address.ValueString()); err != nil && !loadmaster.IsNotFound(err) {
+		resp.Diagnostics.AddError("Error updating connection limit", err.Error())
+		return
+	}
+	if err := r.client.AddConnectionLimit(ctx, plan.Address.ValueString(), strconv.FormatInt(plan.Limit.ValueInt64(), 10)); err != nil {
+		resp.Diagnostics.AddError("Error updating connection limit", err.Error())
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *ConfigConnectionLimitResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
