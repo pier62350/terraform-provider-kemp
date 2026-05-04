@@ -1,0 +1,1 @@
+terraform import kemp_config_syslog.notice notice

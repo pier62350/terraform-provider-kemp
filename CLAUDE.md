@@ -24,21 +24,85 @@ terraform-registry-manifest.json  protocol_versions=["6.0"], required by the Reg
 
 ## Resources at a glance
 
-| Resource | Notes |
-|---|---|
-| `kemp_virtual_service` | VS + SSL/SNI + ESP + WAF intercept_mode |
-| `kemp_sub_virtual_service` | Same surface as VS, created via `modvs createsubvs` |
-| `kemp_real_server` | Backend pool member |
-| `kemp_certificate` | PEM/PFX upload |
-| `kemp_acme_certificate` | Let's Encrypt / DigiCert issuance |
-| `kemp_acme_account` | Service-level ACME bootstrap (one-shot) |
-| `kemp_match_content_rule` … `kemp_replace_body_rule` | 6 system-level content rules (rule types 0–5) |
-| `kemp_virtual_service_rule` | Attach a content rule to a VS by direction |
-| `kemp_virtual_service_waf_rule` | Attach a WAF rule (or rule set) to a VS |
-| `kemp_owasp_custom_rule` / `…_data` | OWASP/ModSecurity custom files (admin-level) |
-| `kemp_waf_custom_rule` / `…_data` | Legacy commercial WAF custom files |
+### Virtual Services
 
-Two data sources: `kemp_virtual_service`, `kemp_real_server`.
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_virtual_service` | ✅ | VS + SSL/SNI + ESP + WAF intercept_mode |
+| `kemp_sub_virtual_service` | ✅ | Same surface as VS, created via `modvs createsubvs` |
+| `kemp_real_server` | ✅ | Backend pool member |
+| `kemp_virtual_service_rule` | ✅ | Attach a content rule to a VS by direction |
+| `kemp_sub_virtual_service_rule` | ✅ | Attach a content rule to a SubVS by direction |
+| `kemp_virtual_service_waf_rule` | ✅ | Attach a WAF rule (or rule set) to a VS; keys on VS triplet, not Index |
+| `kemp_real_server_rule` | ✅ | Attach a content rule to an RS; import `<vs_id>/<rs_id>/<vs_port>/<vs_prot>/<rs_addr>/<rs_port>/<rule>` |
+| `kemp_virtual_service_access_list_entry` | ✅ | Per-VS block/allow list entry; import `<vs_id>/<list_type>/<addr>` |
+
+### Content Rules (system-level, rule types 0–5)
+
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_match_content_rule` | ✅ | Rule type 0 |
+| `kemp_add_header_rule` | ✅ | Rule type 1 |
+| `kemp_delete_header_rule` | ✅ | Rule type 2 |
+| `kemp_replace_header_rule` | ✅ | Rule type 3 |
+| `kemp_modify_url_rule` | ✅ | Rule type 4 |
+| `kemp_replace_body_rule` | ✅ | Rule type 5 |
+
+### Certificates & Security
+
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_certificate` | ✅ | PEM/PFX upload |
+| `kemp_certificates` (data) | ✅ | List installed certificates |
+| `kemp_acme_certificate` | ✅ | Let's Encrypt / DigiCert issuance |
+| `kemp_acme_certificate_renewal` | ✅ | Force-renew an ACME cert |
+| `kemp_acme_account` | ✅ | Service-level ACME bootstrap (one-shot) |
+| `kemp_cipher_set` | ✅ | Custom TLS cipher sets |
+| `kemp_sso_domain` | ✅ | SSO domain (Kerberos, SAML, NTLM, …) |
+
+### WAF
+
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_owasp_custom_rule` / `…_data` | ✅ | OWASP/ModSecurity custom files (admin-level) |
+| `kemp_waf_custom_rule` / `…_data` | ✅ | Legacy commercial WAF custom files |
+
+### LoadMaster Configuration (`kemp_config_*`)
+
+Global settings not tied to a specific VS or RS. All use the `kemp_config_` prefix.
+
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_config_global_health_check` | ✅ | Global default health-check parameters |
+| `kemp_config_route` | ✅ | Static route |
+| `kemp_config_hosts_entry` | ✅ | `/etc/hosts`-style local resolution entry |
+| `kemp_config_interface` (data) | ✅ | Network interface details (read-only) |
+| `kemp_config_ldap_endpoint` | ✅ | LDAP server for authentication |
+| `kemp_config_local_user` | ✅ | Local WUI user account |
+| `kemp_config_group` | ✅ | User permission group |
+| `kemp_config_user_certificate` | ✅ | Per-user client certificate |
+| `kemp_config_syslog` | ✅ | Syslog destination per severity level; import by level name e.g. `notice` |
+| `kemp_config_ha` | ✅ | HA pair setup (mode, partner IP, shared IP, secret); import `loadmaster` |
+| `kemp_config_packet_routing_filter` | ✅ | Packet routing filter (enabled, drop, restrict_to_interface, include_wui); import `loadmaster` |
+| `kemp_config_intrusion_detection` | ✅ | IPS/IDS paranoia level 0–4; import `loadmaster` |
+| `kemp_config_access_list_entry` | ✅ | Global block/allow list entry; import `<list_type>/<addr>` |
+| `kemp_config_bandwidth_limit` | ✅ | Global client bandwidth limit per IP; import by address |
+| `kemp_config_cps_limit` | ✅ | Global connections-per-second limit per IP; import by address |
+| `kemp_config_rps_limit` | ✅ | Global requests-per-second limit per IP; import by address |
+| `kemp_config_connection_limit` | ✅ | Global max concurrent connection limit per IP; import by address |
+| `kemp_config_url_limit_rule` | ✅ | URL-based rate limiting rule (supports update); import by name |
+| `kemp_config_interface_vlan` | ✅ | VLAN on a network interface; import `<interface_id>/<vlan_id>` |
+| `kemp_config_interface_vxlan` | ✅ | VXLAN tunnel (supports update); import by interface_id |
+| `kemp_config_interface_address` | ✅ | Additional IP address on an interface; import `<interface_id>/<address>` |
+| `kemp_config_interface_bond` | ✅ | Bonded (LAG) interface with member management; import by interface_id |
+
+### GEO / Global Server Load Balancing (`kemp_gslb_*`)
+
+| Resource / Data Source | Status | Notes |
+|---|---|---|
+| `kemp_gslb_fqdn` | 📋 planned | FQDN with IP members and location weights |
+| `kemp_gslb_cluster` | 📋 planned | GEO cluster (remote LoadMaster pool) |
+| `kemp_gslb_location` | 📋 planned | Custom geographic location for IP range selection |
 
 **Every resource implements `ImportState`.** Match the pattern of an existing
 resource when adding new ones.
@@ -168,3 +232,5 @@ Examples in this repo use `10.0.x.x` for that reason.
   ```
   TF_ACC=1 KEMP_HOST=https://192.168.1.155 KEMP_API_KEY=... make testacc
   ```
+
+- **GEO / GSLB** — `kemp_gslb_fqdn`, `kemp_gslb_cluster`, `kemp_gslb_location`; requires GEO license.

@@ -143,6 +143,24 @@ func (p *KempProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewSSODomainResource,
 		NewGroupResource,
 		NewUserCertResource,
+		// VS extras
+		NewRealServerRuleResource,
+		NewVirtualServiceAccessListEntryResource,
+		// LoadMaster Configuration
+		NewConfigAccessListEntryResource,
+		NewConfigBandwidthLimitResource,
+		NewConfigCPSLimitResource,
+		NewConfigRPSLimitResource,
+		NewConfigConnectionLimitResource,
+		NewConfigURLLimitRuleResource,
+		NewConfigSyslogResource,
+		NewConfigIntrusionDetectionResource,
+		NewConfigPacketRoutingFilterResource,
+		NewConfigHAResource,
+		NewConfigInterfaceVLANResource,
+		NewConfigInterfaceVXLANResource,
+		NewConfigInterfaceAddressResource,
+		NewConfigInterfaceBondResource,
 	}
 }
 

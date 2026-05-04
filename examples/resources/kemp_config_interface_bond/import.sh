@@ -1,0 +1,1 @@
+terraform import kemp_config_interface_bond.bond0 1

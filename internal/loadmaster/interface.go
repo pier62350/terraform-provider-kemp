@@ -13,6 +13,8 @@ type Interface struct {
 	InterfaceType       string   `json:"InterfaceType"`
 	GeoTrafficEnable    bool     `json:"GeoTrafficEnable"`
 	DefaultInterface    bool     `json:"DefaultInterface"`
+	PartnerIPAddress    string   `json:"PartnerIPAddress,omitempty"`
+	SharedIPAddress     string   `json:"SharedIPAddress,omitempty"`
 }
 
 type interfaceListResponse struct {

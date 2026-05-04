@@ -1,0 +1,1 @@
+terraform import kemp_config_url_limit_rule.example ExampleRule
